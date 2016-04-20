@@ -1,124 +1,113 @@
 package org.jfw.util.execut;
 
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.jfw.util.execut.task.AbstractTask;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class ScheduleService implements Service {
-	private LinkedList<AbstractTask> tasks = new LinkedList<AbstractTask>();
 
-	private Thread thread = null;
+	private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
-	private ReentrantLock commandLock = new ReentrantLock();
-	private LinkedList<Command> commands = new LinkedList<Command>();
+	public ScheduledExecutorService getScheduledExecutorService() {
+		return scheduledExecutorService;
+	}
 
-	public void addCommand(Shell shell, Object param) {
-		commandLock.lock();
-		try {
-			Command cmd = new Command();
-			cmd.shell = shell;
-			cmd.paramter = param;
-
-		} finally {
-			commandLock.unlock();
+	public void setScheduledExecutorService(ScheduledExecutorService ses) {
+		if (ses != null && ses != this.scheduledExecutorService) {
+			this.scheduledExecutorService.shutdown();
+			this.scheduledExecutorService = ses;
 		}
 	}
 
-	private Command getCommand() {
-		commandLock.lock();
-		try {
-			return commands.poll();
-		} finally {
-			commandLock.unlock();
-		}
+	public void schedule(Runnable runnable, Trigger trigger) {
+		new ReschedulingRunnable(runnable, trigger).schedule();
 	}
 
-	private void handleCommands() {
-		Command cmd;
-		AbstractTask task;
-		while ((cmd = this.getCommand()) != null) {
-			switch (cmd.shell) {
-			case CREATE:
-				task = (AbstractTask) cmd.paramter;
-				this.tasks.add(task);
-				break;
-			case DELETE:
-				task = (AbstractTask) cmd.paramter;
-				this.tasks.remove(task);
-				break;
-			case SUSPEND:
-				task = (AbstractTask) cmd.paramter;
-				task.suspend();
-				break;
-			case RESUME:
-				task = (AbstractTask) cmd.paramter;
-				task.resume();
-			case STOP:
-				this.shutdown();
-				break;
-			// default:
-			//
-			}
-		}
-
+	public ScheduledFuture<?> schedule(Runnable command, long delay) {
+		return this.scheduledExecutorService.schedule(command, delay, TimeUnit.MILLISECONDS);
 	}
 
-	private void scheduleTask() {
-		for (ListIterator<AbstractTask> it = this.tasks.listIterator(); it.hasNext();) {
-			AbstractTask task = it.next();
-			if (task.isScheduling()) {
-				if (task.isIdle()) {
-					if (task.getNextRunningTime() >= System.currentTimeMillis()) {
-						task.start();
-						this.eService.submit(task);
-					}
-				}
-			}
-		}
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-		}
+	public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay) {
+		return this.scheduledExecutorService.schedule(callable, delay, TimeUnit.MILLISECONDS);
+	}
+
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period) {
+		return this.scheduledExecutorService.scheduleAtFixedRate(command, initialDelay, period, TimeUnit.MILLISECONDS);
+	}
+
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay) {
+		return this.scheduledExecutorService.scheduleWithFixedDelay(command, initialDelay, delay,
+				TimeUnit.MILLISECONDS);
+	}
+
+	<T> Future<T> submit(Callable<T> task) {
+		return this.scheduledExecutorService.submit(task);
+	}
+
+	<T> Future<T> submit(Runnable task, T result) {
+		return this.scheduledExecutorService.submit(task, result);
+	}
+
+	Future<?> submit(Runnable task) {
+		return this.submit(task);
+	}
+
+	<T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+		return this.invokeAll(tasks);
+	}
+
+	<T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+			throws InterruptedException {
+		return this.scheduledExecutorService.invokeAll(tasks, timeout, TimeUnit.MILLISECONDS);
+	}
+
+	<T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+		return this.scheduledExecutorService.invokeAny(tasks);
+	}
+
+	<T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
+		return this.scheduledExecutorService.invokeAny(tasks, timeout, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
 	public void startup() throws Exception {
-		this.thread = Thread.currentThread();
-		try {
-			while (this.thread != null) {
-				this.handleCommands();
-				this.scheduleTask();
-			}
-		} finally {
-			this.thread = null;
-		}
 
 	}
 
 	@Override
 	public void shutdown() {
-		Thread t = this.thread;
-		this.thread = null;
-		if (t != null)
-			t.interrupt();
+		scheduledExecutorService.shutdown();
 	}
 
-	private ExecutorService eService;
+	class ReschedulingRunnable implements Runnable {
+		private final Object monitor = new Object();
+		private final Runnable delegate;
+		private final Trigger trigger;
 
-	public void setExecutorService(ExecutorService service) {
-		this.eService = service;
+		ReschedulingRunnable(Runnable delegate, Trigger trigger) {
+			this.delegate = delegate;
+			this.trigger = trigger;
+		}
+
+		public void schedule() {
+			synchronized (this.monitor) {
+				long delay = this.trigger.nextExecutionTime() - System.currentTimeMillis();
+				scheduledExecutorService.schedule(this, delay, TimeUnit.MILLISECONDS);
+			}
+		}
+
+		@Override
+		public void run() {
+			this.delegate.run();
+			this.schedule();
+		}
 	}
-
-	public enum Shell {
-		CREATE, DELETE, SUSPEND, RESUME, STOP
-	}
-
-	private static class Command {
-		public Shell shell;
-		public Object paramter;
-	}
-
 }

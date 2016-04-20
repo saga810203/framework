@@ -18,4 +18,10 @@ public class IoUtil {
 		} catch (IOException e) {
 		}
 	}
+    public static void copy(InputStream in,OutputStream os,byte[] buf)throws IOException{
+        int len = 0;
+        while((len=in.read(buf))>=0){
+            os.write(buf, 0, len);
+        }        
+    }
 }

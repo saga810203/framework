@@ -1,14 +1,27 @@
-package org.jfw.util.execut.task;
+package org.jfw.util.execut.trigger;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.jfw.util.DateUtil;
-
+/**
+ *minute, hour, day, month, weekday. Month and weekday names can be
+ * given as the first three letters of the English names.
+ *
+ * <p>Example patterns:
+ * <ul>
+ * <li>0 0 * * *  = the top of every hour of every day.</li>
+ * <li>* /10 * * * * *" = every ten minute.</li>
+ * <li>"0 8-10 * * *" = 8, 9 and 10 o'clock of every day.</li>
+ * <li>"0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.</li>
+ * <li>"0 9-17 * * 1-5" = on the hour nine-to-five weekdays</li>
+ * <li>"0 0 25 12 ?" = every Christmas Day at midnight</li>
+ * </ul>
+ */
 public class CronDate {
+
 	private static final int[] DEFAULT_MI = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
 			21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
 			48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 };
@@ -44,14 +57,27 @@ public class CronDate {
 	public String getCronString() {
 		return cronString;
 	}
-
+	/**
+	 *minute, hour, day, month, weekday. Month and weekday names can be
+	 * given as the first three letters of the English names.
+	 *
+	 * <p>Example patterns:
+	 * <ul>
+	 * <li>0 0 * * *  = the top of every hour of every day.</li>
+	 * <li>* /10 * * * * *" = every ten minute.</li>
+	 * <li>"0 8-10 * * *" = 8, 9 and 10 o'clock of every day.</li>
+	 * <li>"0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30 and 10 o'clock every day.</li>
+	 * <li>"0 9-17 * * 1-5" = on the hour nine-to-five weekdays</li>
+	 * <li>"0 0 25 12 ?" = every Christmas Day at midnight</li>
+	 * </ul>
+	 */
 	static public CronDate buildCronDate(String cronStr) {
 		try {
 			String[] ss = cronStr.split(" ");
 			ArrayList<String> list = new ArrayList<String>();
 			for (String s : ss) {
 				s = s.trim();
-				if (!s.equals(""))
+				if (s.length()>0)
 					list.add(s);
 			}
 			int[] pmi = parserValue(list.get(0), DEFAULT_MI);
@@ -76,7 +102,7 @@ public class CronDate {
 
 			return new CronDate(cronStr, pmi, phh24, pddm, pmm, pddw);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("错误的定时任务表达式：" + cronStr);
+			throw new IllegalArgumentException("invalid cron expression:" + cronStr);
 		}
 
 	}
@@ -318,43 +344,50 @@ public class CronDate {
 	// System.out.println("]");
 	// }
 	public static void main(String[] args) {
-		String cronStr = "2,5-9 13-18 6,9,22,30 4-10/2 *";
-		String ss = "2014-07-31 10:08:00";
-
-		CronDate c = CronDate.buildCronDate(cronStr);
-
-		java.text.SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		String cronStr = "2,5-9 13-18 6,9,22,30 4-10/2 *";
+//		String ss = "2014-07-31 10:08:00";
+//
+//		CronDate c = CronDate.buildCronDate(cronStr);
+//
+//		java.text.SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+//
+//		Calendar cal = Calendar.getInstance();
+//
+//		cal.set(Calendar.YEAR, Integer.parseInt(ss.substring(0, 4)));
+//		cal.set(Calendar.MONTH, Integer.parseInt(ss.substring(5, 7)) - 1);
+//		cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(ss.substring(8, 10)));
+//		cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(ss.substring(11, 13)));
+//		cal.set(Calendar.MINUTE, Integer.parseInt(ss.substring(14, 16)));
+//		cal.set(Calendar.SECOND, Integer.parseInt(ss.substring(17, 19)));
+//
+//		// System.out.println(sdf.format(cal.getTime()));
+//
+//		long l = c.getNextTimeByTime(cal.getTimeInMillis());
+//
+//		cal.setTimeInMillis(l);
+//
+//		System.out.println(sdf.format(cal.getTime()));
+//		//
+//		cal.setTimeInMillis(c.getNextTime());
+//		System.out.println(sdf.format(cal.getTime()));
+//		cal.setTimeInMillis(c.getNextTime());
+//		System.out.println(sdf.format(cal.getTime()));
+//		cal.setTimeInMillis(c.getNextTime());
+//		System.out.println(sdf.format(cal.getTime()));
+//		cal.setTimeInMillis(c.getNextTime());
+//		System.out.println(sdf.format(cal.getTime()));
+//		cal.setTimeInMillis(c.getNextTime());
+//		System.out.println(sdf.format(cal.getTime()));
+//		cal.setTimeInMillis(c.getNextTime());
+//		System.out.println(sdf.format(cal.getTime()));
 
 		Calendar cal = Calendar.getInstance();
-
-		cal.set(Calendar.YEAR, Integer.parseInt(ss.substring(0, 4)));
-		cal.set(Calendar.MONTH, Integer.parseInt(ss.substring(5, 7)) - 1);
-		cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(ss.substring(8, 10)));
-		cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(ss.substring(11, 13)));
-		cal.set(Calendar.MINUTE, Integer.parseInt(ss.substring(14, 16)));
-		cal.set(Calendar.SECOND, Integer.parseInt(ss.substring(17, 19)));
-
-		// System.out.println(sdf.format(cal.getTime()));
-
-		long l = c.getNextTimeByTime(cal.getTimeInMillis());
-
-		cal.setTimeInMillis(l);
-
-		System.out.println(sdf.format(cal.getTime()));
-		//
-		cal.setTimeInMillis(c.getNextTime());
-		System.out.println(sdf.format(cal.getTime()));
-		cal.setTimeInMillis(c.getNextTime());
-		System.out.println(sdf.format(cal.getTime()));
-		cal.setTimeInMillis(c.getNextTime());
-		System.out.println(sdf.format(cal.getTime()));
-		cal.setTimeInMillis(c.getNextTime());
-		System.out.println(sdf.format(cal.getTime()));
-		cal.setTimeInMillis(c.getNextTime());
-		System.out.println(sdf.format(cal.getTime()));
-		cal.setTimeInMillis(c.getNextTime());
-		System.out.println(sdf.format(cal.getTime()));
-
+		System.out.println(cal.get(Calendar.YEAR));
+		System.out.println(cal.get(Calendar.MONTH));
+		System.out.println(cal.get(Calendar.DAY_OF_MONTH));
+		
+		System.out.println(cal.get(Calendar.DAY_OF_WEEK));
 	}
 
 }
+
