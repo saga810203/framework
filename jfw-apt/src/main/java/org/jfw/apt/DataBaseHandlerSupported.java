@@ -15,7 +15,7 @@ public class DataBaseHandlerSupported extends AbstractCodeGenerateHandler {
 
 	@Override
 	public boolean isSupportedInterFace() {
-		return false;
+		return true;
 	}
 
 	@Override

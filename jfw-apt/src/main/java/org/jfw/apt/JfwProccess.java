@@ -187,7 +187,7 @@ public class JfwProccess extends javax.annotation.processing.AbstractProcessor {
 						bn = te.getQualifiedName().toString();
 					}
 					bn = bn.trim().replaceAll("\\.", "_");
-					ClassBeanDefine cbd = this.beanConfig.addServiceBeanByClass(te.getQualifiedName().toString(), null);
+					ClassBeanDefine cbd = this.beanConfig.addServiceBeanByClass(te.getQualifiedName().toString(), bn);
 					Utils.buildAtuowrieProperty(cbd, te);
 				} else {
 					String bn = fb.value();
@@ -302,7 +302,7 @@ public class JfwProccess extends javax.annotation.processing.AbstractProcessor {
 
 	public void saveResourceFile(String fileName, String fileContent) throws AptException {
 		try {
-			FileObject fo = this.filer.createResource(javax.tools.StandardLocation.SOURCE_OUTPUT, "", fileName,
+			FileObject fo = this.filer.createResource(javax.tools.StandardLocation.CLASS_OUTPUT, "", fileName,
 					(Element[]) null);
 			OutputStream os = fo.openOutputStream();
 			try {

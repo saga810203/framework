@@ -155,9 +155,9 @@ public class QueryOperateCG extends DBOperateCG {
 
 			if (Utils.isPrimitive(rt))
 				rt = Utils.getWrapClass(rt);
-			sb.append("java.util.List<").append(rt).append("> result = new java.util。ArrayList<").append(rt)
+			sb.append("java.util.List<").append(rt).append("> result = new java.util.ArrayList<").append(rt)
 					.append(">();\r\n");
-			sb.append("while(rs.next(){");
+			sb.append("while(rs.next()){");
 			if (this.query.singleColumn() != DataElement.invalid_de) {
 				this.fieldHandlers[0].readValue(sb, "result.add(", ");", 1, this.query.singleColumn().isNullable(),
 						this.attributes);

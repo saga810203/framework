@@ -103,7 +103,7 @@ public abstract class AbstractCodeGenerateHandler implements CodeGenerateHandler
 	}
 	
 	public void handleGenerateClassManagedByBeanFactory(StringBuilder sb){
-		if(this.isManagedByBeanFactory()){
+		if(this.isGenerateClassManagedByBeanFactory()){
 			ThreadSafe ts = this.ref.getAnnotation(ThreadSafe.class);
 			if(ts==null || ts.value()){
 				sb.append("@org.jfw.apt.annotation.Bean(\"").append(this.ref.getQualifiedName().toString()).append("\")\r\n");
