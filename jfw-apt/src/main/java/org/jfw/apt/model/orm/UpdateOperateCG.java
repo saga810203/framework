@@ -85,7 +85,7 @@ public class UpdateOperateCG extends DBOperateCG {
 				sb.append("?");
 			} else {
 				if (isFirstDynamicValue) {
-					isFirstDynamicValue = true;
+					isFirstDynamicValue = false;
 					sb.append("\");\r\n");
 				}
 				if(i==0){
