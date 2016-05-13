@@ -23,7 +23,7 @@ public class DeleteOperateCG extends DBOperateCG {
 		if (this.delete == null)
 			throw new AptException(this.ref, "nofound @Delete on this method");
 		if (!this.returnType.equals("int"))
-			throw new AptException(ref, "this method(@Update) must return int");
+			throw new AptException(ref, "this method(@Delete) must return int");
 
 		String targetClassName = null;
 
@@ -34,7 +34,7 @@ public class DeleteOperateCG extends DBOperateCG {
 		}
 
 		if (targetClassName.equals("java.lang.Object")) {
-			this.byBean = false;
+			this.byBean = true;
 			if (this.params.size() != 2)
 				throw new AptException(ref, "this method[@Delete(targer=Object.class)] parameters count must be 2");
 			targetClassName = this.params.get(1).getTypeName();
@@ -44,6 +44,7 @@ public class DeleteOperateCG extends DBOperateCG {
 						"this method[@Delete(targer=Object.class)] secone parameter type must be WithAnnotation @Table");
 			}
 		} else {
+			this.byBean = false;
 			this.po = ormDefine.getPersistentObject(targetClassName);
 			if (this.po == null || this.po.getKind() != PersistentObjectKind.TABLE) {
 				throw new AptException(ref, "this method[@Delete'target value must be Object.class or Class(@Table)");
@@ -114,7 +115,7 @@ public class DeleteOperateCG extends DBOperateCG {
 			Column col = this.values.get(i);
 			col.initHandler(ref);
 			if(this.byBean)
-			col.getHandler().init(this.params.get(i).getName()+"."+col.getGetter()+"()",false, false, this.attributes);
+			col.getHandler().init(this.params.get(1).getName()+"."+col.getGetter()+"()",false, false, this.attributes);
 			else{
 				col.getHandler().init(col.getJavaName(),false, false, this.attributes);	
 			}

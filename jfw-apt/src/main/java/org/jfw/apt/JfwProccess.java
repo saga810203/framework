@@ -262,7 +262,7 @@ public class JfwProccess extends javax.annotation.processing.AbstractProcessor {
 			if (list != null && list.size() > 0)
 				continue;
 			List<? extends AnnotationMirror> ans = el.getAnnotationMirrors();
-			System.out.println(el.toString());
+//			System.out.println(el.toString());
 			for (AnnotationMirror anm : ans) {
 				Object obj = Utils.getReturnValueOnAnnotation("handlerClass", anm);
 				Class<CodeGenerateHandler> cghcls = Utils.getClass(obj, CodeGenerateHandler.class);

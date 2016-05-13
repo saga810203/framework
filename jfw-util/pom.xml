@@ -4,9 +4,13 @@
 	<parent>
 		<groupId>org.jfw</groupId>
 		<artifactId>framework</artifactId>
-		<version>${project.version}</version>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>jfw-util</artifactId>
+ 	<properties>
+		<maven.compiler.useIncrementalCompilation>false</maven.compiler.useIncrementalCompilation>
+	</properties> 
 	<dependencies>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
