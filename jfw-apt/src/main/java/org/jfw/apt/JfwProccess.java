@@ -302,6 +302,19 @@ public class JfwProccess extends javax.annotation.processing.AbstractProcessor {
 
 	public void saveResourceFile(String fileName, String fileContent) throws AptException {
 		try {
+			FileObject fo = this.filer.createResource(javax.tools.StandardLocation.SOURCE_OUTPUT, "", fileName,
+					(Element[]) null);
+			OutputStream os = fo.openOutputStream();
+			try {
+				os.write(fileContent.getBytes("UTF-8"));
+				os.flush();
+			} finally {
+				os.close();
+			}
+		} catch (Exception e) {
+			throw new AptException(this.currentElement, "save resource file[" + fileName + "] error:" + e.getMessage());
+		}
+		try {
 			FileObject fo = this.filer.createResource(javax.tools.StandardLocation.CLASS_OUTPUT, "", fileName,
 					(Element[]) null);
 			OutputStream os = fo.openOutputStream();

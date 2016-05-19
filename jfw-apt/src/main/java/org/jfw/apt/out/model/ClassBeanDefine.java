@@ -46,7 +46,7 @@ public class ClassBeanDefine extends BeanDefine{
 	public void setRefAttribute(String key,String val){
 		BeanAttributeDefine attr = new BeanAttributeDefine();
 		attr.setKey(key);
-		attr.setRef(false);
+		attr.setRef(true);
 		attr.setValue(val);
 		attr.setValueClassName(null);	
 		this.addAttribute(attr);

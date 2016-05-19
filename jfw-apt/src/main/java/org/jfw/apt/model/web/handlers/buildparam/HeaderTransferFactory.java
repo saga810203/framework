@@ -19,7 +19,7 @@ public class HeaderTransferFactory {
     @SuppressWarnings("unchecked")
     private final static void loadTransfer() {
         try {
-            Enumeration<URL> en = Thread.currentThread().getContextClassLoader().getResources(RESOURCE);
+            Enumeration<URL> en = HeaderTransferFactory.class.getClassLoader().getResources(RESOURCE);
             while(en.hasMoreElements()){
                 URL url = en.nextElement();
                 URLConnection con = url.openConnection();

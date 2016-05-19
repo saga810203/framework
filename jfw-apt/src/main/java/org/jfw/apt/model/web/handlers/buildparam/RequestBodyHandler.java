@@ -27,14 +27,14 @@ public class RequestBodyHandler extends BuildParamHandler.BuildParameter {
 				.append(" = ");
 		if (!parameterized) {
 			sb.append("org.jfw.util.json.JsonService.fromJson(new java.io.InputStreamReader(").append(localName)
-					.append(", org.jfw.util.ConstData.UTF8),").append(tn).append(".class);");
+					.append(", org.jfw.util.ConstData.UTF8),").append(tn).append(".class);\r\n");
 		} else {
 			sb.append("org.jfw.util.json.JsonService.<").append(tn).append(">fromJson(new java.io.InputStreamReader(")
 					.append(localName)
 					.append(", org.jfw.util.ConstData.UTF8),new new org.jfw.util.reflect.TypeReference<").append(tn)
-					.append(">(){}.getType() );");
+					.append(">(){}.getType() );\r\n");
 		}
-		sb.append("}finally{\r\n").append(localName).append(".close();}");
+		sb.append("}finally{\r\n").append(localName).append(".close();\r\n}\r\n");
 
 	}
 
