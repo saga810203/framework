@@ -34,6 +34,7 @@ public class UploadItemIteratorImpl implements UploadItemIterator {
 	protected static final byte[] STREAM_TERMINATOR = { DASH, DASH };
 	protected static final byte[] BOUNDARY_PREFIX = { CR, LF, DASH, DASH };
 	
+	private byte[] orginBoundary;
 	private byte[] marker;
 	private byte[] shareCache ;
 	private InputStream input;
@@ -184,6 +185,29 @@ public class UploadItemIteratorImpl implements UploadItemIterator {
 		}
 		return true;
 	}
+	public static UploadItemIteratorImpl build(String charEncoding,String contentType,InputStream input) throws IOException{
+		UploadItemIteratorImpl it = new UploadItemIteratorImpl();
+		it.charEncoding = charEncoding;
+		it.contentType =contentType;
+		it.input = input;
+		byte[] boundary = getBoundary(it.contentType);
+		if (boundary == null) {
+			throw new IOException("the request was rejected because no multipart boundary was found");
+		}
+		if (boundary.length > 200)
+			throw new IOException("Unsupported multipart boundary length in HTTP POST header Content-Type");
+		it.orginBoundary = boundary;
+		it.boundaryLength = boundary.length + 4;
+		// it.minFillCount4FindBoundary = it.boundaryLength + 1;
+		it.boundary = new byte[it.boundaryLength];
+		it.boundary[0] = CR;
+		it.boundary[1] = LF;
+		it.boundary[2] = DASH;
+		it.boundary[3] = DASH;
+		System.arraycopy(boundary, 0, it.boundary, 4, boundary.length);
+
+		return it;
+	}
 
 	public static UploadItemIteratorImpl build(HttpServletRequest request) throws IOException {
 		UploadItemIteratorImpl it = new UploadItemIteratorImpl();
@@ -196,6 +220,7 @@ public class UploadItemIteratorImpl implements UploadItemIterator {
 		}
 		if (boundary.length > 200)
 			throw new IOException("Unsupported multipart boundary length in HTTP POST header Content-Type");
+		it.orginBoundary = boundary;
 		it.boundaryLength = boundary.length + 4;
 		// it.minFillCount4FindBoundary = it.boundaryLength + 1;
 		it.boundary = new byte[it.boundaryLength];
@@ -311,7 +336,7 @@ public class UploadItemIteratorImpl implements UploadItemIterator {
 			// Inner multipart terminated -> Return to parsing the outer
 			this.currentFieldName = null;
 			this.pos4NextBoundary = -1;
-			this.setBoundary(this.boundary);
+			this.setBoundary(this.orginBoundary);
 			result = this.hasNextInternal();
 		}
 		return result;
@@ -407,6 +432,7 @@ public class UploadItemIteratorImpl implements UploadItemIterator {
 				break;
 			}
 		}
+		os.write(HEADER_SEPARATOR);
 		String headers = null;
 		if (charEncoding != null) {
 			try {

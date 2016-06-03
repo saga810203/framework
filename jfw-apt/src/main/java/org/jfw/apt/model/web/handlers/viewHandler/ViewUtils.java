@@ -15,7 +15,7 @@ public abstract class ViewUtils {
 		//out: jsp.out
 		//result:Object
 		  sb.append("out.write(\"{\\\"success\\\":true,\\\"data\\\":\");\r\n")
-          .append("//org.jfw.util.json.JsonService.toJson(result,out);\r\n")
+          .append("org.jfw.util.json.JsonService.toJson(result,out);\r\n")
           .append("out.write(\"}\");\r\n");      
 	}
 	public static void printJSONSuccess(ViewHandler handler,StringBuilder sb){

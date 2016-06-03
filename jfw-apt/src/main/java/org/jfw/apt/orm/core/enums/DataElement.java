@@ -27,8 +27,8 @@ public enum DataElement {
     String_de(OrmString.class,"VARCHAR",10,-1,true,null,true,null,true),    
     
     
-    CreateTime_de(OrmString.class,"VARCHAR",14,-1,false,"TO_DATA('YYYYMMDDHH24MISS',SYSDATE)",false,null,true),
-    ModifyTime_de(OrmString.class,"VARCHAR",14,-1,false,"TO_DATA('YYYYMMDDHH24MISS',SYSDATE)",true,"TO_DATA('YYYYMMDDHH24MISS',SYSDATE)",true),
+    CreateTime_de(OrmString.class,"VARCHAR",14,-1,false,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",false,null,true),
+    ModifyTime_de(OrmString.class,"VARCHAR",14,-1,false,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",true,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",true),
     
 	BIGDECMIMAL(OrmBigDecimal.class,"DECIMAL",10,10,true,null,true,null,true);
 	
