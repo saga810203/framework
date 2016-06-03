@@ -9,7 +9,8 @@
 	</parent>
 	<artifactId>jfw-util</artifactId>
  	<properties>
-		<maven.compiler.useIncrementalCompilation>false</maven.compiler.useIncrementalCompilation>
+		<!-- <maven.compiler.useIncrementalCompilation>false</maven.compiler.useIncrementalCompilation> -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties> 
 	<dependencies>
 		<dependency>
