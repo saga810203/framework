@@ -72,7 +72,7 @@ public class UpdateOperateCG extends DBOperateCG {
 		boolean isFirstDynamicValue = true;
 		for (int i = 0; i < this.values.size(); ++i) {
 			Column col = this.values.get(i);
-			String fixVal = col.getFixValueWithUpdate();
+			String fixVal = col.getFixUpdateSqlValue();
 			if (fixVal != null) {
 				if (i != 0)
 					sb.append(",");
@@ -88,25 +88,24 @@ public class UpdateOperateCG extends DBOperateCG {
 					isFirstDynamicValue = false;
 					sb.append("\");\r\n");
 				}
-				if(i==0){
+				if (i == 0) {
 					numOfUpdateColumns = this.getTempalteVariableName();
 					sb.append(" int ").append(numOfUpdateColumns).append(" = 0 ;\r\n");
 				}
-				
-				
+
 				sb.append("if(");
 				col.getHandler().checkNull(sb);
 				sb.append("){\r\n");
-				if(null==numOfUpdateColumns){
+				if (null == numOfUpdateColumns) {
 					sb.append("sql.append(\",").append(col.getDbName()).append("=?\");\r\n}\r\n");
-				}else{
-					sb.append("++").append(numOfUpdateColumns).append(";\r\nif(")
-					.append(numOfUpdateColumns).append(" > 1){\r\nsql.append(\",\");\r\n}\r\n");
-					sb.append("sql.append(\"").append(col.getDbName()).append("=?\");\r\n}\r\n");					
+				} else {
+					sb.append("++").append(numOfUpdateColumns).append(";\r\nif(").append(numOfUpdateColumns)
+							.append(" > 1){\r\nsql.append(\",\");\r\n}\r\n");
+					sb.append("sql.append(\"").append(col.getDbName()).append("=?\");\r\n}\r\n");
 				}
 			}
 		}
-		if(numOfUpdateColumns!=null){
+		if (numOfUpdateColumns != null) {
 			sb.append("if(0==").append(numOfUpdateColumns).append(") return 0;\r\n");
 		}
 		for (int i = 0; i < this.filters.size(); ++i) {
@@ -125,15 +124,15 @@ public class UpdateOperateCG extends DBOperateCG {
 	private void initOrmHandlers() throws AptException {
 		for (int i = 0; i < this.values.size(); ++i) {
 			Column col = this.values.get(i);
-			if (null != col.getFixValueWithUpdate())
+			if (null != col.getFixUpdateSqlValue())
 				continue;
 			col.initHandler(ref);
 			if (this.update.dynamicValue()) {
-				col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", true, true,
+				col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", true, col.isNullable(),
 						this.attributes);
 			} else {
-				col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", true, col.nullable,
-						this.attributes);
+				col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", true,
+						col.isNullable(), this.attributes);
 			}
 			col.getHandler().prepare(sb);
 
@@ -158,7 +157,7 @@ public class UpdateOperateCG extends DBOperateCG {
 					break;
 				}
 			}
-			if ((!inWhere) && col.getDataElement().supportedUpdate())
+			if ((!inWhere) && col.isRenewable())
 				this.values.add(col);
 		}
 		if (this.values.isEmpty())
@@ -170,7 +169,7 @@ public class UpdateOperateCG extends DBOperateCG {
 		for (int i = 0; i < this.values.size(); ++i) {
 			sb.append(i == 0 ? " " : ",");
 			Column col = this.values.get(i);
-			String value = Utils.emptyToNull(col.getDataElement().getFixSqlValueWithUpdate());
+			String value = col.getFixUpdateSqlValue();
 
 			sb.append(this.values.get(i).getDbName()).append("=").append(null == value ? "?" : value);
 		}
@@ -179,26 +178,24 @@ public class UpdateOperateCG extends DBOperateCG {
 			sb.append(i == 0 ? " " : " AND ").append(this.filters.get(i).getDbName()).append("=?");
 		}
 		sb.append("\";\r\n");
-
 	}
 
 	private void sortColumns(List<Column> list) {
 		Collections.sort(list, new Comparator<Column>() {
 
 			private int getSortedNum(Column col) {
-				String fixUpdate = Utils.emptyToNull(col.getDataElement().getFixSqlValueWithUpdate());
+				String fixUpdate = Utils.emptyToNull(col.getFixUpdateSqlValue());
 				if (null != fixUpdate)
 					return 0;
 				if (col.isPrimitive())
 					return 1;
-				return 2;
+				return col.isNullable() ? 3 : 2;
 			}
 
 			@Override
 			public int compare(Column o1, Column o2) {
 				return getSortedNum(o1) - getSortedNum(o2);
 			}
-
 		});
 	}
 
@@ -206,12 +203,12 @@ public class UpdateOperateCG extends DBOperateCG {
 	protected void buildSqlParamter() {
 		for (int i = 0; i < this.values.size(); ++i) {
 			Column col = this.values.get(i);
-			if (null == col.getFixValueWithUpdate()) {
-				col.getHandler().writeValue(sb,true);
+			if (null == col.getFixUpdateSqlValue()) {
+				col.getHandler().writeValue(sb, this.dynamic);
 			}
 		}
 		for (int i = 0; i < this.filters.size(); ++i) {
-			this.filters.get(i).getHandler().writeValue(sb,false);
+			this.filters.get(i).getHandler().writeValue(sb, false);
 		}
 
 	}
@@ -225,7 +222,8 @@ public class UpdateOperateCG extends DBOperateCG {
 	@Override
 	protected boolean needRelaceResource() {
 		for (Column col : this.values) {
-			if(null==col.getHandler()) continue;
+			if (null == col.getHandler())
+				continue;
 			if (col.getHandler().isReplaceResource())
 				return true;
 		}
@@ -239,7 +237,8 @@ public class UpdateOperateCG extends DBOperateCG {
 	@Override
 	protected void relaceResource() {
 		for (Column col : this.values) {
-			if(null==col.getHandler())continue;
+			if (null == col.getHandler())
+				continue;
 			col.getHandler().replaceResource(sb);
 		}
 		for (Column col : this.filters) {

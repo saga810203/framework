@@ -127,13 +127,8 @@ public class DeleteOperateCG extends DBOperateCG {
 	@Override
 	protected void buildSqlParamter() {
 		for (int i = 0; i < this.values.size(); ++i) {
-			Column col = this.values.get(i);
-			if (null == col.getFixValueWithUpdate()) {
-				col.getHandler().writeValue(sb,false);
-			}
+			this.values.get(i).getHandler().writeValue(sb,false);			
 		}
-		
-
 	}
 
 	@Override

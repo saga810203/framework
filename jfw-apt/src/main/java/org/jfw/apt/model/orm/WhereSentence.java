@@ -44,7 +44,7 @@ public class WhereSentence {
 				} else {
 					sb.append(this.and ? " AND " : " OR ");
 				}
-				sb.append(this.values[i].getValueExpression());
+				sb.append(this.values[i].getSqlExpression());
 			}
 		}
 		return sb.toString();
@@ -68,7 +68,7 @@ public class WhereSentence {
 						sb.append(" AND ");
 					else
 						sb.append(sb.append(" OR "));
-					Utils.addSqlToStringBuilder(sve.getValueExpression(), sb);
+					Utils.addSqlToStringBuilder(sve.getSqlExpression(), sb);
 					sb.append("\");\r\n}");
 				} else {
 					if (i != 0 || this.sentence != null) {
@@ -77,7 +77,7 @@ public class WhereSentence {
 						else 
 							sb.append(" OR ");
 					}
-					Utils.addSqlToStringBuilder(sve.getValueExpression(), sb);
+					Utils.addSqlToStringBuilder(sve.getSqlExpression(), sb);
 					if (this.values[i + 1].isNullable()) {
 						sb.append("\");");
 					}
@@ -101,7 +101,7 @@ public class WhereSentence {
 				}
 				sb.append("++numOfFilers;\r\n");
 				sb.append("whereSql.append(\"");
-				Utils.addSqlToStringBuilder(sve.getValueExpression(), sb);
+				Utils.addSqlToStringBuilder(sve.getSqlExpression(), sb);
 				sb.append("\");\r\n}\r\n");
 			}
 			sb.append("if(numOfFilers >0) sql.append(\" WHERE \").append(whereSql.toString());\r\n");
@@ -172,8 +172,8 @@ public class WhereSentence {
 		}
 		if (ws.dynamic) {
 			for (SqlValue sv : svs) {
-				if (null == Utils.emptyToNull(sv.valueExpression()))
-					throw new AptException(ref, "dynamic where sql @Where.values[?].valueExpression must be not empty");
+				if (null == Utils.emptyToNull(sv.sqlExpression()))
+					throw new AptException(ref, "dynamic where sql @Where.values[?].sqlExpression must be not empty");
 			}
 		}
 		ws.values = new SqlValueEntry[svs.length];

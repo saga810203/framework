@@ -4,7 +4,7 @@ import javax.lang.model.element.Element;
 
 import org.jfw.apt.Utils;
 import org.jfw.apt.exception.AptException;
-import org.jfw.apt.orm.core.enums.DataElement;
+import org.jfw.apt.orm.core.enums.DE;
 
 public class CalcColumn extends Column {
 	
@@ -14,7 +14,7 @@ public class CalcColumn extends Column {
 
 	public static CalcColumn build(org.jfw.apt.annotation.orm.CalcColumn col,Element ele) throws AptException
 	{
-		if(DataElement.invalid_de == col.value()) throw new AptException(ele,"value can't equals DataElement.invalid_de in @CalcColumn");
+		if(DE.invalid_de == col.value()) throw new AptException(ele,"value can't equals DE.invalid_de in @CalcColumn");
 		CalcColumn result = new CalcColumn();
 		result.ele = ele;
 		result.javaName =ele.getSimpleName().toString();

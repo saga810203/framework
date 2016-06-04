@@ -33,19 +33,17 @@ public class InsertOperateCG extends DBOperateCG {
 		this.columns = po.getAllColumn();
 		this.initOrmHandlers();
 		this.buildStaticSQL();
-		
 
 	}
 
-	
 	private void initOrmHandlers() throws AptException {
 		for (int i = 0; i < this.columns.size(); ++i) {
 			Column col = this.columns.get(i);
-
-			if (null != col.getDataElement().getFixSqlValueWithInsert())
+			if (!col.isInsertable())
+				continue;
+			if (null != col.getFixInsertSqlValue())
 				continue;
 			col.initHandler(ref);
-
 			col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", true, col.nullable,
 					this.attributes);
 			col.getHandler().prepare(sb);
@@ -56,33 +54,48 @@ public class InsertOperateCG extends DBOperateCG {
 
 	private void buildStaticSQL() {
 		this.sb.append("String sql=\"INSERT INTO ").append(this.po.getFromSentence()).append(" (");
+
+		boolean firstColumn = true;
 		for (int i = 0; i < this.columns.size(); ++i) {
-			sb.append(i == 0 ? "" : ",");
 			Column col = this.columns.get(i);
+			if (!col.isInsertable())
+				continue;
+			if (firstColumn) {
+				firstColumn = false;
+			} else {
+				sb.append(",");
+			}
 			sb.append(col.getDbName());
 		}
 		sb.append(") values (");
+		firstColumn = true;
 		for (int i = 0; i < this.columns.size(); ++i) {
 			Column col = this.columns.get(i);
-			sb.append(i == 0 ? "" : ",");
-			String value = Utils.emptyToNull(col.getDataElement().getFixSqlValueWithInsert());
-			if(value==null){
+			if (!col.isInsertable())
+				continue;
+			if (firstColumn) {
+				firstColumn = false;
+			} else {
+				sb.append(",");
+			}
+			String value = Utils.emptyToNull(col.getFixInsertSqlValue());
+			if (value == null) {
 				sb.append("?");
-			}else{
-			sb.append(value);
+			} else {
+				sb.append(value);
 			}
 		}
 		sb.append(")\";\r\n");
-
 	}
-
 
 	@Override
 	protected void buildSqlParamter() {
 		for (int i = 0; i < this.columns.size(); ++i) {
 			Column col = this.columns.get(i);
-			if (null == col.getFixValueWithInsert()) {
-				col.getHandler().writeValue(sb,false);
+			if (!col.isInsertable())
+				continue;
+			if (null == col.getFixInsertSqlValue()) {
+				col.getHandler().writeValue(sb, false);
 			}
 		}
 	}

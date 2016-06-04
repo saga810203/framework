@@ -8,10 +8,10 @@ import org.jfw.apt.Utils;
 import org.jfw.apt.annotation.orm.SqlValue;
 import org.jfw.apt.exception.AptException;
 import org.jfw.apt.orm.core.OrmHandler;
-import org.jfw.apt.orm.core.enums.DataElement;
+import org.jfw.apt.orm.core.enums.DE;
 
 public class SqlValueEntry implements Comparable<SqlValueEntry> {
-	public DataElement getDe() {
+	public DE getDe() {
 		return de;
 	}
 
@@ -23,8 +23,8 @@ public class SqlValueEntry implements Comparable<SqlValueEntry> {
 		return attributeName;
 	}
 
-	public String getValueExpression() {
-		return valueExpression;
+	public String getSqlExpression() {
+		return sqlExpression;
 	}
 
 	public boolean isNullable() {
@@ -47,12 +47,12 @@ public class SqlValueEntry implements Comparable<SqlValueEntry> {
 		return Utils.isPrimitive(this.supportedClassName);
 	}
 
-	private DataElement de;
+	private DE de;
 	private String paramName;
 	private String attributeName;
 	private String paramExpression;
 	private boolean nullable;
-	private String valueExpression;
+	private String sqlExpression;
 	private OrmHandler orm;
 	private String supportedClassName;
 
@@ -72,8 +72,8 @@ public class SqlValueEntry implements Comparable<SqlValueEntry> {
 		if(sve.paramExpression !=null && sve.paramName!=null){
 			throw new AptException(ref,"@SqlValue: paramName !=null && paramExpression!=null");
 		}
-		sve.valueExpression = val.valueExpression();
-		if( dynamic && null == sve.valueExpression){
+		sve.sqlExpression = val.sqlExpression();
+		if( dynamic && null == sve.sqlExpression){
 			throw new AptException(ref,"@Query @Where dynamic==true && @SqlValue valueExpression == null");
 		}
 		try {

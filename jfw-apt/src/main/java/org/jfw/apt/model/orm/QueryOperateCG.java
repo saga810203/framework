@@ -6,7 +6,7 @@ import org.jfw.apt.Utils;
 import org.jfw.apt.annotation.orm.Query;
 import org.jfw.apt.exception.AptException;
 import org.jfw.apt.orm.core.OrmHandler;
-import org.jfw.apt.orm.core.enums.DataElement;
+import org.jfw.apt.orm.core.enums.DE;
 
 public class QueryOperateCG extends DBOperateCG {
 
@@ -19,7 +19,7 @@ public class QueryOperateCG extends DBOperateCG {
 	private WhereSentence where;
 
 	// private boolean singleRow() default false;
-	// DataElement singleColumn() default DataElement.invalid_de;
+	// DE singleColumn() default DE.invalid_de;
 	// Class<?> resultClass() default Object.class;
 	// String otherSentence() default "";
 	// Where where() default @Where();
@@ -37,7 +37,7 @@ public class QueryOperateCG extends DBOperateCG {
 				throw new AptException(this.ref, "this method must be return java.util.List<Object>");
 			}
 		}
-		if (this.query.singleColumn() == DataElement.invalid_de) {
+		if (this.query.singleColumn() == DE.invalid_de) {
 			String bcn = this.realReturnType;
 			this.bean = this.ormDefine.getPersistentObject(bcn);
 			if (this.bean == null)
@@ -158,7 +158,7 @@ public class QueryOperateCG extends DBOperateCG {
 			sb.append("java.util.List<").append(rt).append("> result = new java.util.ArrayList<").append(rt)
 					.append(">();\r\n");
 			sb.append("while(rs.next()){");
-			if (this.query.singleColumn() != DataElement.invalid_de) {
+			if (this.query.singleColumn() != DE.invalid_de) {
 				this.fieldHandlers[0].readValue(sb, "result.add(", ");", 1, this.query.singleColumn().isNullable(),
 						this.attributes);
 			} else {
@@ -180,7 +180,7 @@ public class QueryOperateCG extends DBOperateCG {
 				sb.append("= null");
 			sb.append(";\r\n");
 			sb.append("if(rs.next()){");
-			if (this.query.singleColumn() != DataElement.invalid_de) {
+			if (this.query.singleColumn() != DE.invalid_de) {
 				this.fieldHandlers[0].readValue(sb, "result = ", ";", 1, this.query.singleColumn().isNullable(),
 						this.attributes);
 			} else {
