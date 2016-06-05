@@ -128,7 +128,7 @@ public class UpdateOperateCG extends DBOperateCG {
 				continue;
 			col.initHandler(ref);
 			if (this.update.dynamicValue()) {
-				col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", true, col.isNullable(),
+				col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", true, !col.isPrimitive(),
 						this.attributes);
 			} else {
 				col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", true,

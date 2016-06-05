@@ -91,14 +91,14 @@ public class SqlValueEntry implements Comparable<SqlValueEntry> {
 				if(sve.isPrimitive()){
 					sve.nullable = false;					
 				}else{
-					sve.nullable = val.nullable();
+					sve.nullable = val.de().isNullable();
 				}
 			}
 		}else{
 				if(sve.isPrimitive()){
 					sve.nullable = false;					
 				}else{
-					sve.nullable= val.nullable();
+					sve.nullable= val.de().isNullable();
 				}  
 		}
 		

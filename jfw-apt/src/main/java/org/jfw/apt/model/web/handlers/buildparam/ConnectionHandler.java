@@ -13,7 +13,7 @@ public class ConnectionHandler extends BuildParamHandler.BuildParameter{
 	public void build(StringBuilder sb, MethodParamEntry mpe, RequestMappingCodeGenerator rmcg) throws AptException {
 		
 		
-		if((!mpe.getName().equals("con"))||(!"jdbc.sql.Connection".equals(mpe.getTypeName())))
+		if((!mpe.getName().equals("con"))||(!"java.sql.Connection".equals(mpe.getTypeName())))
 			throw new AptException(mpe.getRef(),"@JdbcConn java type must be java.sql.Connection ,parameter name must be con");
 		rmcg.setAttribute(NEED_JDBC_CONN, Boolean.TRUE);
 		rmcg.setAttribute(COMMIT_JDBC_CONN, mpe.getRef().getAnnotation(JdbcConn.class).value());

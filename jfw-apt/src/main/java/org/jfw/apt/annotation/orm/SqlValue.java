@@ -12,8 +12,6 @@ public @interface SqlValue {
 	DE de();
 	String paramName() default "";
 	String attributeName() default "";
-	// read value from method parameter
 	String paramExpression() default "";
-	boolean nullable() default false;
 	String sqlExpression() default "";
 }

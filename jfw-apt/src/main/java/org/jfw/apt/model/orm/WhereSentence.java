@@ -58,6 +58,8 @@ public class WhereSentence {
 			if (this.sentence != null) {
 				Utils.addSqlToStringBuilder(this.sentence, sb);
 			}
+            if(this.values.length>0 && this.values[0].isNullable())	sb.append("\");");
+				
 			for (int i = 0; i < this.values.length; ++i) {
 				SqlValueEntry sve = this.values[i];
 				if (sve.isNullable()) {
