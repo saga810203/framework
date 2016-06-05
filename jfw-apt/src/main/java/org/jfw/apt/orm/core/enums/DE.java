@@ -38,8 +38,16 @@ public enum DE {
     CreateTime_de(OrmString.class,"CHAR",14,-1,false,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",null,true),
     ModifyTime_de(OrmString.class,"CHAR",14,-1,false,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)","TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",true),
     
-	BIGDECMIMAL(OrmBigDecimal.class,"DECIMAL",10,10,true,null,null,true);
+	bigDecmimal(OrmBigDecimal.class,"DECIMAL",10,10,false,null,null,true),
+	BigDecmimal(OrmBigDecimal.class,"DECIMAL",10,10,true,null,null,true),
 	
+	blob(OrmBlob.class,"BLOB",-1,-1,false,null,null,false),
+	Blob(OrmBlob.class,"BLOB",-1,-1,true,null,null,false),
+	
+	streamBlob(OrmStreamBlob.class,"BLOB",-1,-1,false,null,null,false),
+	StreamBlob(OrmStreamBlob.class,"BLOB",-1,-1,true,null,null,false),
+	
+	;
 	
 	
 	private DE(Class<? extends OrmHandler> handlerClass, String dbType,int dbTypeLength,int dbTypePrecision,boolean nullable,

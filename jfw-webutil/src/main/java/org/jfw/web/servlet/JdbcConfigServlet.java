@@ -103,8 +103,9 @@ public class JdbcConfigServlet extends FilenameConfigServlet {
 
 	@Override
 	protected void buildBeanFactoryConfig() {
-		if (Boolean.valueOf(this.getServletConfig().getInitParameter(OVER_CONFIG)))
+		if (Boolean.parseBoolean(this.getServletConfig().getInitParameter(OVER_CONFIG)))
 			super.buildBeanFactoryConfig();
+		
 		if (this.config == null)
 			this.config = new Properties();
 		if (this.initJdbcEvn()) {

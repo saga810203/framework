@@ -1,6 +1,7 @@
 package org.jfw.web.servlet;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,9 +10,11 @@ import java.util.Properties;
 
 import javax.servlet.ServletException;
 
+import org.jfw.util.ConstData;
 import org.jfw.util.bean.AfterBeanFactory;
 import org.jfw.util.bean.BeanFactory;
-import org.jfw.util.io.IoUtil;
+import org.jfw.util.io.MultiInputStreamHandler;
+import org.jfw.util.io.ResourceUtil;
 import org.jfw.util.web.WebHandlerContext;
 import org.jfw.util.web.model.WebRequestEntry;
 
@@ -61,6 +64,26 @@ public class FilenameConfigServlet extends BaseServlet {
 		return list.toArray(new String[list.size()]);
 	}
 
+	
+	
+	protected void handleConfigResource(String name) throws Exception{
+		Properties po = ResourceUtil.<Properties>readClassResource(name, new MultiInputStreamHandler<Properties>() {
+			Properties pMap = new Properties();
+			@Override
+			public void handle(InputStream in) throws Exception {
+				Properties tmp = new Properties();				
+				tmp.load(new InputStreamReader(in,ConstData.UTF8));	
+				this.pMap.putAll(tmp);
+			}
+
+			@Override
+			public Properties get() {
+				return this.pMap;
+			}
+		}, Thread.currentThread().getContextClassLoader());
+		config.putAll(po);
+		
+	}
 	protected void buildBeanFactoryConfig() {
 		String tmp = this.getServletConfig().getInitParameter(BEAN_FAC_FILE_NAME);
 		if (tmp != null && tmp.trim().length() > 0)
@@ -72,16 +95,7 @@ public class FilenameConfigServlet extends BaseServlet {
 		config = new Properties();
 		for (int i = 0; i < filenames.length; ++i) {
 			try {
-				InputStream in = this.getClass().getClassLoader().getResourceAsStream(filenames[i]);
-				try {
-					if (in == null)
-						continue;
-					Properties p = new Properties();
-					p.load(in);
-					config.putAll(p);
-				} finally {
-					IoUtil.close(in);
-				}
+				this.handleConfigResource(filenames[i]);
 			} catch (Throwable th) {
 				this.config = null;
 				this.log(FilenameConfigServlet.class.getName() + ":load config file[" + filenames[i] + "] error", th);

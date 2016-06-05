@@ -107,9 +107,9 @@ public class WebHandlerSupported implements CodeGenerateHandler {
 	public String getTargetClassName() {
 		return this.className + "WebHandler";
 	}
-	
-	public String getTargetQualifiedName(){
-		return this.packageName+this.className+"WebHandler";		
+
+	public String getTargetQualifiedName() {
+		return this.packageName + this.className + "WebHandler";
 	}
 
 	protected void writeContent() throws AptException {
@@ -136,7 +136,7 @@ public class WebHandlerSupported implements CodeGenerateHandler {
 
 					ClassBeanDefine wre = this.beanConfig.addEntryBeanByClass("org.jfw.util.web.model.WebRequestEntry",
 							null);
-					wre.setRefAttribute("webHandler",this.getTargetQualifiedName().trim().replaceAll("\\.","_"));
+					wre.setRefAttribute("webHandler", this.getTargetQualifiedName().trim().replaceAll("\\.", "_"));
 					wre.setString("uri", vuri);
 					wre.setString("methodName", rmcg.getWebMethodName());
 					wre.setString("methodType", m.toString());
@@ -148,15 +148,18 @@ public class WebHandlerSupported implements CodeGenerateHandler {
 	}
 
 	protected void writeInstanceVariable() {
-
+		sb.append("@org.jfw.apt.annotation.Autowrie(\"dataSource\")\r\n");
+		sb.append(" private javax.sql.DataSource dataSource = null;\r\n");
+		sb.append("public void setDataSource(javax.sql.DataSource dataSource){this.dataSource = dataSource;}");
 		if (!this.threadSafe) {
-			sb.append("@org.jfw.apt.annotation.Autowrie(\"").append(this.ref.getQualifiedName().toString().trim()+"@factroy").append("\")\r\n");
-			sb.append(
-					" private org.jfw.util.comm.ObjectFactory handlerFactory = null;\r\n")
+			sb.append("@org.jfw.apt.annotation.Autowrie(\"")
+					.append(this.ref.getQualifiedName().toString().trim() + "@factroy").append("\")\r\n");
+			sb.append(" private org.jfw.util.comm.ObjectFactory handlerFactory = null;\r\n")
 					.append("public void setHandlerFactory(org.jfw.util.comm.ObjectFactory paHandlerFactory){\r\n")
 					.append("    this.handlerFactory = paHandlerFactory;\r\n}\r\n");
 		} else {
-			sb.append("@org.jfw.apt.annotation.Autowrie(\"").append(this.ref.getQualifiedName().toString()).append("\")\r\n");
+			sb.append("@org.jfw.apt.annotation.Autowrie(\"").append(this.ref.getQualifiedName().toString())
+					.append("\")\r\n");
 			sb.append("private ").append(this.packageName).append(this.className).append(" handler = null;\r\n");
 			sb.append("public void setHandler(").append(this.packageName).append(this.className)
 					.append(" value)\r\n{\r\n handler = value;\r\n}\r\n");
@@ -220,7 +223,7 @@ public class WebHandlerSupported implements CodeGenerateHandler {
 		this.uri = vuri;
 
 		ThreadSafe ts = this.ref.getAnnotation(ThreadSafe.class);
-		this.threadSafe = null== ts || ts.value();
+		this.threadSafe = null == ts || ts.value();
 		List<Class<? extends RequestHandler>> list = this.getHandlerClass();
 		if (list.isEmpty())
 			throw new AptException(ref, "@WebHandler'handler not null or empty array");
@@ -238,25 +241,29 @@ public class WebHandlerSupported implements CodeGenerateHandler {
 		// threadSafe);
 		// mvcBeans.add(mvc);
 
-		//this.addToBeanConfig();
+		// this.addToBeanConfig();
 
 		this.writeFile();
 	}
 
-//	private void addToBeanConfig() {
-//		this.cbd = beanConfig.addServiceBeanByClass(this.packageName + this.getTargetClassName(), null);
-//
-//		if (this.threadSafe) {
-//			ClassBeanDefine h = this.beanConfig.addServiceBeanByClass(this.defaultHandlerClassName, null);
-//			this.cbd.setRefAttribute("handler", h.getId());
-//		} else {
-//			ClassBeanDefine of = this.beanConfig.addServiceBeanByClass("org.jfw.util.comm.ClassCreateFactory",
-//					(this.defaultHandlerClassName+ "@factroy").replaceAll("\\.", "_"));
-//			of.setClass("clazz", this.packageName + this.className);
-//			this.cbd.setRefAttribute("handlerFactory", of.getId());
-//		}
-//
-//	}
+	// private void addToBeanConfig() {
+	// this.cbd = beanConfig.addServiceBeanByClass(this.packageName +
+	// this.getTargetClassName(), null);
+	//
+	// if (this.threadSafe) {
+	// ClassBeanDefine h =
+	// this.beanConfig.addServiceBeanByClass(this.defaultHandlerClassName,
+	// null);
+	// this.cbd.setRefAttribute("handler", h.getId());
+	// } else {
+	// ClassBeanDefine of =
+	// this.beanConfig.addServiceBeanByClass("org.jfw.util.comm.ClassCreateFactory",
+	// (this.defaultHandlerClassName+ "@factroy").replaceAll("\\.", "_"));
+	// of.setClass("clazz", this.packageName + this.className);
+	// this.cbd.setRefAttribute("handlerFactory", of.getId());
+	// }
+	//
+	// }
 
 	public String getServiceMethodName() {
 		return "ws_" + (++this.methodSeq);

@@ -111,9 +111,9 @@ public class SqlValueEntry implements Comparable<SqlValueEntry> {
 		if(this.paramName!=null){
 			if(this.attributeName==null) return paramName;
 			if(this.supportedClassName.equals("boolean"))
-				return "is"+this.attributeName.substring(0, 1).toUpperCase()+
+				return this.paramName+".is"+this.attributeName.substring(0, 1).toUpperCase()+
 						(this.attributeName.length()>1?this.attributeName.substring(1):"")+"()";
-			return "get"+this.attributeName.substring(0, 1).toUpperCase()+
+			return this.paramName+".get"+this.attributeName.substring(0, 1).toUpperCase()+
 					(this.attributeName.length()>1?this.attributeName.substring(1):"")+"()";
 					
 		}else return this.paramExpression;
