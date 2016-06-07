@@ -21,7 +21,7 @@ public class QueryOperateCG extends DBOperateCG {
 	// private boolean singleRow() default false;
 	// DE singleColumn() default DE.invalid_de;
 	// Class<?> resultClass() default Object.class;
-	// String otherSentence() default "";
+	private String otherSentence;
 	// Where where() default @Where();
 	//
 	private Query query;
@@ -99,12 +99,25 @@ public class QueryOperateCG extends DBOperateCG {
 			sb.append(" WHERE ");
 			Utils.addSqlToStringBuilder(whereSql, sb);
 		}
+		if(this.otherSentence!=null){
+			sb.append(" ");
+			Utils.addSqlToStringBuilder(this.otherSentence, sb);
+		}
 		sb.append("\";\r\n");
 	}
 
 	private void buildDynamicSQL() throws AptException {
 		sb.append("StringBuilder sql = new StringBuilder();\r\n");
+		sb.append("sql.append(\"");
+		Utils.addSqlToStringBuilder(this.querySql, sb);
+		sb.append("\");\r\n");
 		this.where.appendToSql(sb);
+		
+		if(this.otherSentence!=null){
+			sb.append("sql.append(\" ");
+			Utils.addSqlToStringBuilder(this.otherSentence, sb);
+			sb.append("\");\r\n");
+		}	
 	}
 
 	private void checkSQL() throws AptException {
@@ -127,6 +140,7 @@ public class QueryOperateCG extends DBOperateCG {
 		this.query = this.ref.getAnnotation(Query.class);
 		if (this.query == null)
 			throw new AptException(this.ref, "nofound @Query on this method");
+		this.otherSentence = Utils.emptyToNull(query.otherSentence());
 		this.checkReturnType();
 		this.where = WhereSentence.build(ref, this.query.where(), this.attributes);
 		this.dynamic = where.isDynamicWhereSql();
