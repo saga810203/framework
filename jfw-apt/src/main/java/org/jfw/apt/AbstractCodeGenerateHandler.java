@@ -21,10 +21,50 @@ public abstract class AbstractCodeGenerateHandler implements CodeGenerateHandler
 	protected TypeElement ref;
 	protected Object annotationObj;
 	protected AnnotationMirror annotationMirror;
+	
 	protected Messager messager;
 	protected Filer filer;
-	protected String packageName;
-	protected String className;
+
+	protected String sourceClassname;
+	protected String targetClassname;
+	
+	
+	public String getSourcePackageName(){
+		int index = this.sourceClassname.lastIndexOf(".");
+		if(index == -1 ) return "";
+		return this.sourceClassname.substring(0, index);
+	}
+	public String getSourceSimpleClassname(){
+		int index = this.sourceClassname.lastIndexOf(".");
+		if(index == -1 ) return this.sourceClassname;
+		++index;
+		return this.sourceClassname.substring(index);
+	}
+	
+	
+	public String getTargetPackageName(){
+		int index = this.targetClassname.lastIndexOf(".");
+		if(index == -1 ) return "";
+		return this.targetClassname.substring(0, index);
+	}
+	public String getTargetSimpleClassname(){
+		int index = this.targetClassname.lastIndexOf(".");
+		if(index == -1 ) return this.targetClassname;
+		++index;
+		return this.targetClassname.substring(index);
+	}
+	
+	
+	@Override
+	public String getSourceClassname() {
+		return this.sourceClassname;
+	}
+
+	@Override
+	public String getTargetClassname() {
+		return this.targetClassname;
+	}
+
 
 	public abstract boolean isSupportedInterFace();
 
@@ -54,41 +94,23 @@ public abstract class AbstractCodeGenerateHandler implements CodeGenerateHandler
 	}
 
 	protected void writeSouceFile() throws AptException {
-		String originName = this.ref.getQualifiedName().toString();
-		String typeName = null;
-		int index = originName.lastIndexOf(".");
-		packageName = "";
-		className = null;
-		if (index > 0) {
-			packageName = originName.substring(0, index + 1);
-			typeName = originName.substring(index + 1);
 
-		} else {
-			typeName = originName;
-		}
-		if (this.ref.getKind() == ElementKind.INTERFACE) {
-			packageName = packageName + "impl";
-			className = typeName + "Impl";
-		} else {
-			packageName = packageName + "extend";
-			className = typeName + "Extend";
-		}
 
 		try {
 			
 			StringBuilder sb = new StringBuilder();
-			sb.append("package ").append(packageName).append(";\r\n");
+			sb.append("package ").append(this.getTargetPackageName()).append(";\r\n");
 			this.handleGenerateClassManagedByBeanFactory(sb);
-			sb.append("public class ").append(className);
+			sb.append("public class ").append(this.getTargetSimpleClassname());
 			if (this.ref.getKind() == ElementKind.INTERFACE) {
-				sb.append(" implements ").append(originName);
+				sb.append(" implements ").append(this.getSourceClassname());
 			} else {
-				sb.append(" extends ").append(originName);
+				sb.append(" extends ").append(this.getSourceClassname());
 			}
 			sb.append(" {");
 			this.writeContent(sb);
 			sb.append("\r\n}");
-			JavaFileObject jfo = this.filer.createSourceFile(packageName + "." + className, this.ref);
+			JavaFileObject jfo = this.filer.createSourceFile(this.getTargetClassname(), this.ref);
 			Writer w = jfo.openWriter();
 			try {
 				w.write(sb.toString());
@@ -97,7 +119,7 @@ public abstract class AbstractCodeGenerateHandler implements CodeGenerateHandler
 			}
 		} catch (IOException e) {
 			throw new AptException(this.ref,
-					"write java sorce file(" + packageName + "." + typeName + ") error:" + e.getMessage());
+					"write java sorce file(" +this.getTargetClassname()+ ") error:" + e.getMessage());
 		}
 
 	}
@@ -131,6 +153,18 @@ public abstract class AbstractCodeGenerateHandler implements CodeGenerateHandler
 		if (kind == ElementKind.CLASS && (!isAbstract(ref)) && (!this.isSupportedNoAbstractClass())) {
 			throw new AptException(ref, "type can't supported Annotation " + getAnnotationClassName(am));
 		}
+		this.sourceClassname = this.ref.getQualifiedName().toString();
+		String pn = this.getSourcePackageName();
+		String cn = this.getSourceSimpleClassname();
+
+		if (this.ref.getKind() == ElementKind.INTERFACE) {
+		
+			
+			this.targetClassname = pn+(pn.length()>0?".":"")+"impl."+cn+"Impl";
+		} else {
+			this.targetClassname = pn+(pn.length()>0?".":"")+"extend."+cn+"Extend";
+		}
+		
 		this.writeSouceFile();
 		
 	}

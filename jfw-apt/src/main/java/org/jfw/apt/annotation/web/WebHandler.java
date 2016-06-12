@@ -23,5 +23,5 @@ public @interface WebHandler {
 	Class<? extends RequestHandler>[] handler() default { ViewHandler.class, BuildParamHandler.class,ValidateParamHandler.class,
 			JdbcConnectionHandler.class, ExecuteHandler.class, SetSessionHandler.class, LastScriptHandler.class };
 	String value() default "";
-	Class<?> defaultHandlerClass() default Object.class;
+//	Class<?> defaultHandlerClass() default Object.class;
 }

@@ -18,9 +18,8 @@ public class ExecuteHandler extends RequestHandler{
 		List<MethodParamEntry> mpes = this.rmcg.getParams();
 
 		if(!this.rmcg.getWebHandlerSupported().isThreadSafe()){
-			sb.append(this.rmcg.getWebHandlerSupported().getPackageName()).append(this.rmcg.getWebHandlerSupported().getClassName())
-			.append(" handler  = (").append(this.rmcg.getWebHandlerSupported().getPackageName())
-			.append(this.rmcg.getWebHandlerSupported().getClassName()).append(")handlerFactory.get();\r\n");
+			sb.append(this.rmcg.getWebHandlerSupported().getSourceClassname())
+			.append(" handler  = (").append(this.rmcg.getWebHandlerSupported().getSourceClassname()).append(")handlerFactory.get();\r\n");
 		}
 		if(!"void".equals(this.rmcg.getReturnType())){
 			sb.append("result = ");

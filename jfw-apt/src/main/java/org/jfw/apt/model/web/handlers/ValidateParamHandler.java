@@ -40,10 +40,68 @@ public class ValidateParamHandler extends RequestHandler {
 			}
 		}
 	}
-	public static class ValidParameter {		
+	public static abstract class ValidParameter {
+		
+		public static final String RESULT_NAME_KEY = ValidParameter.class.getName()+".RESULT_NAME";
+		protected String name;
+		protected String methodName;
+		protected String infoEl;
+		protected StringBuilder sb;
+		protected MethodParamEntry mpe;
+		protected AbstractMethodGenerater amg;
+		
+		
+		protected String resultName ;
+		
+		
+		public abstract void doValid();
+		public String[] eanbleClassnames(){
+			return new String[]{};
+		}
+		public abstract String annotationClassName();
+		
+		public void handleInvalid(){
+			this.sb.append("throw new IllegalArgumentException(\"invalid parameter:" + this.name + "\");");
+		}
 		
 		public void build(StringBuilder sb, MethodParamEntry mpe, AbstractMethodGenerater amg)
 				throws AptException {
+			
+		
+			this.sb = sb;
+			this.mpe = mpe;
+			this.amg = amg;
+			this.name = mpe.getName();
+			
+			
+			String pcn = mpe.getTypeName();
+			String[] ecns = this.eanbleClassnames();
+			boolean enable = ecns.length==0;
+			
+			for(String cn :ecns){
+				if(cn.equals(pcn)) {
+					enable= true;
+					break;
+				}
+			}
+			if(!enable){
+				String an = this.annotationClassName();
+				if(an==null) an = "[TODO:]";
+				throw new AptException(mpe.getRef(), an+" nosupported java type");
+			}
+		//	this.methodName = amg.get
+			this.resultName =(String)amg.getAttribute(RESULT_NAME_KEY);
+			if(this.resultName==null){
+				this.resultName = amg.getTempalteVariableName();
+				amg.setAttribute(RESULT_NAME_KEY,this.resultName);
+				sb.append(" boolean ").append(this.resultName).append(" = true;");
+			}else{
+				sb.append(this.resultName).append(" = true;");
+			}
+			this.doValid();
+			sb.append("if(!").append(this.resultName).append("){");
+			this.handleInvalid();
+			sb.append("}");			
 		}
 	}
 }

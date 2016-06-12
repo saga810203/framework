@@ -66,5 +66,4 @@ public class DataBaseHandlerSupported extends AbstractCodeGenerateHandler {
 	public boolean isGenerateClassManagedByBeanFactory() {
 		return true;
 	}
-
 }

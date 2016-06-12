@@ -11,4 +11,7 @@ public interface CodeGenerateHandler {
 	void setEnv(Map<String,Object> env);
 	void handle(TypeElement ref,AnnotationMirror am,Object annotationObj) throws AptException;
 	boolean isManagedByBeanFactory();
+	
+	String getSourceClassname();
+	String getTargetClassname();
 }
