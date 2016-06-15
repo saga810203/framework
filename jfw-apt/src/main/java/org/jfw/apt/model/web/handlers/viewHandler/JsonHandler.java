@@ -9,6 +9,7 @@ public class JsonHandler  extends ViewHandler.ViewHandlerImpl {
 		//default json view
 //		JSON json = this.viewHandler.getRmcg().getRef().getAnnotation(JSON.class);
 //		if(null==json) throw new AptException(this.viewHandler.getRmcg().getRef(),"invalid @JSON:nofunod @JSON");
+		sb.append("res.setContentType(\"application/json\");");
 		this.viewHandler.getRmcg().readOut(sb);
 	}
 	@Override

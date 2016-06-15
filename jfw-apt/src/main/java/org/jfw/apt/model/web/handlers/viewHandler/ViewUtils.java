@@ -2,13 +2,12 @@ package org.jfw.apt.model.web.handlers.viewHandler;
 
 import org.jfw.apt.model.web.handlers.ViewHandler;
 
-//FIXME:override this class
 public abstract class ViewUtils {
 	public static void printJSONException(ViewHandler handler, StringBuilder sb){
 		//e:Exception
 		//res:HttpServletResponse
 		//out: jsp.out
-		sb.append("out.print(\"{success:false}\");\r\n");
+		sb.append("org.jfw.util.json.JsonService.write(e,out);");		
 	}
 	public static void printJSONWithValue(ViewHandler handler,StringBuilder sb){
 		//res:HttpServletResponse

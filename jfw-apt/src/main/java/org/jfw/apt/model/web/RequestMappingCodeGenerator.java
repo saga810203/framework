@@ -107,6 +107,7 @@ public class RequestMappingCodeGenerator extends AbstractMethodGenerater {
 		sb.append("public void ").append(this.webMethodName)
 				.append("(javax.servlet.http.HttpServletRequest req,javax.servlet.http.HttpServletResponse res,int viewType) ")
 				.append(" throws javax.servlet.ServletException,java.io.IOException{\r\n");
+		sb.append("req.setCharacterEncoding(\"UTF-8\");res.setCharacterEncoding(\"UTF-8\");");
 		if (!this.returnType.equals("void")) {
 
 			sb.append(this.returnType).append(" result");

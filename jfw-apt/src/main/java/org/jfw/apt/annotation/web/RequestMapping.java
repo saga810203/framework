@@ -10,5 +10,5 @@ import org.jfw.apt.model.web.RequestMethod;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RequestMapping {
 	String value() default "";
-	RequestMethod[] method() default {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE};
+	RequestMethod[] method() default {RequestMethod.GET};
 }

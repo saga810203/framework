@@ -23,10 +23,10 @@ public class WebHandlerContext {
 	public static final Map<String, ControllerMethod> deleteStaticUrls = new HashMap<String, ControllerMethod>();
 	public static final Map<String, ControllerMethod> putStaticUrls = new HashMap<String, ControllerMethod>();
 
-	private static final ControllerMethod[][] getDynamicUrls = new ControllerMethod[100][0];
-	private static final ControllerMethod[][] postDynamicUrls = new ControllerMethod[100][0];
-	private static final ControllerMethod[][] deleteDynamicUrls = new ControllerMethod[100][0];
-	private static final ControllerMethod[][] putDynamicUrls = new ControllerMethod[100][0];
+	private static ControllerMethod[][] getDynamicUrls = new ControllerMethod[10][0];
+	private static ControllerMethod[][] postDynamicUrls = new ControllerMethod[10][0];
+	private static ControllerMethod[][] deleteDynamicUrls = new ControllerMethod[10][0];
+	private static ControllerMethod[][] putDynamicUrls = new ControllerMethod[10][0];
 
 	private static String[] matchDynamicUrl(String url) {
 		String[] result = WebUtil.splitUri(url);
@@ -80,19 +80,42 @@ public class WebHandlerContext {
 			}
 		} else {
 			ControllerMethod cm = new ControllerMethod(handler, method, dynamicUrl);
+			int newIndex = dynamicUrl.length + 1;
+
 			if ("GET".equalsIgnoreCase(methodType)) {
+				if (newIndex > getDynamicUrls.length) {
+					ControllerMethod[][] newUrls = new ControllerMethod[newIndex][];
+					System.arraycopy(getDynamicUrls, 0, newUrls, 0, getDynamicUrls.length);
+					getDynamicUrls = newUrls;
+				}
+
 				ControllerMethod[] cms = extendArray(getDynamicUrls[dynamicUrl.length]);
 				cms[cms.length - 1] = cm;
 				getDynamicUrls[dynamicUrl.length] = cms;
 			} else if ("POST".equalsIgnoreCase(methodType)) {
+				if (newIndex > postDynamicUrls.length) {
+					ControllerMethod[][] newUrls = new ControllerMethod[newIndex][];
+					System.arraycopy(postDynamicUrls, 0, newUrls, 0, getDynamicUrls.length);
+					postDynamicUrls = newUrls;
+				}
 				ControllerMethod[] cms = extendArray(postDynamicUrls[dynamicUrl.length]);
 				cms[cms.length - 1] = cm;
 				postDynamicUrls[dynamicUrl.length] = cms;
 			} else if ("DELETE".equalsIgnoreCase(methodType)) {
+				if (newIndex > deleteDynamicUrls.length) {
+					ControllerMethod[][] newUrls = new ControllerMethod[newIndex][];
+					System.arraycopy(deleteDynamicUrls, 0, newUrls, 0, getDynamicUrls.length);
+					deleteDynamicUrls = newUrls;
+				}
 				ControllerMethod[] cms = extendArray(deleteDynamicUrls[dynamicUrl.length]);
 				cms[cms.length - 1] = cm;
 				deleteDynamicUrls[dynamicUrl.length] = cms;
 			} else if ("PUT".equalsIgnoreCase(methodType)) {
+				if (newIndex > putDynamicUrls.length) {
+					ControllerMethod[][] newUrls = new ControllerMethod[newIndex][];
+					System.arraycopy(putDynamicUrls, 0, newUrls, 0, getDynamicUrls.length);
+					putDynamicUrls = newUrls;
+				}
 				ControllerMethod[] cms = extendArray(putDynamicUrls[dynamicUrl.length]);
 				cms[cms.length - 1] = cm;
 				putDynamicUrls[dynamicUrl.length] = cms;
@@ -102,12 +125,25 @@ public class WebHandlerContext {
 		}
 		return true;
 	}
+	private static ControllerMethod find(String[] uripart, ControllerMethod[][] cmss) {
+		int ulen = uripart.length;
+		if (ulen < cmss.length) {
+			ControllerMethod[] cms = cmss[ulen];
+			if (cms != null)
+				for (ControllerMethod cm : cms) {
+					if (cm.match(uripart)) {
+						return cm;
+					}
+				}
+		}
+		return null;
+	}
 
 	public static ControllerMethod findWithGetMethod(HttpServletRequest req, int prefixLen) {
 		String uri = WebUtil.normalize(req.getRequestURI());
-		try{
-		uri = uri.substring(prefixLen);
-		}catch(java.lang.StringIndexOutOfBoundsException e){
+		try {
+			uri = uri.substring(prefixLen);
+		} catch (java.lang.StringIndexOutOfBoundsException e) {
 			uri = "";
 		}
 		ControllerMethod result = getStaticUrls.get(uri);
@@ -116,15 +152,15 @@ public class WebHandlerContext {
 			return result;
 		}
 		String[] uripart = WebUtil.splitUri(uri);
-		ControllerMethod[] cms = getDynamicUrls[uripart.length];
-		for (ControllerMethod cm : cms) {
-			if (cm.match(uripart)) {
-				req.setAttribute(REQ_MATCH_URI_DYN, uripart);
-				return cm;
-			}
+		
+		result = find(uripart, getDynamicUrls);
+		if(null!=result){
+			req.setAttribute(REQ_MATCH_URI_DYN, uripart);	
 		}
-		return null;
+		return result;
 	}
+
+
 
 	public static ControllerMethod findWithPostMethod(HttpServletRequest req, int prefixLen) {
 		String uri = WebUtil.normalize(req.getRequestURI());
@@ -135,14 +171,11 @@ public class WebHandlerContext {
 			return result;
 		}
 		String[] uripart = WebUtil.splitUri(uri);
-		ControllerMethod[] cms = postDynamicUrls[uripart.length];
-		for (ControllerMethod cm : cms) {
-			if (cm.match(uripart)) {
-				req.setAttribute(REQ_MATCH_URI_DYN, uripart);
-				return cm;
-			}
+		result = find(uripart, postDynamicUrls);
+		if(null!=result){
+			req.setAttribute(REQ_MATCH_URI_DYN, uripart);	
 		}
-		return null;
+		return result;
 	}
 
 	public static ControllerMethod findWithPutMethod(HttpServletRequest req, int prefixLen) {
@@ -154,14 +187,11 @@ public class WebHandlerContext {
 			return result;
 		}
 		String[] uripart = WebUtil.splitUri(uri);
-		ControllerMethod[] cms = putDynamicUrls[uripart.length];
-		for (ControllerMethod cm : cms) {
-			if (cm.match(uripart)) {
-				req.setAttribute(REQ_MATCH_URI_DYN, uripart);
-				return cm;
-			}
+		result = find(uripart, putDynamicUrls);
+		if(null!=result){
+			req.setAttribute(REQ_MATCH_URI_DYN, uripart);	
 		}
-		return null;
+		return result;
 	}
 
 	public static ControllerMethod findWithDeleteMethod(HttpServletRequest req, int prefixLen) {
@@ -173,25 +203,22 @@ public class WebHandlerContext {
 			return result;
 		}
 		String[] uripart = WebUtil.splitUri(uri);
-		ControllerMethod[] cms = deleteDynamicUrls[uripart.length];
-		for (ControllerMethod cm : cms) {
-			if (cm.match(uripart)) {
-				req.setAttribute(REQ_MATCH_URI_DYN, uripart);
-				return cm;
-			}
+		result = find(uripart, deleteDynamicUrls);
+		if(null!=result){
+			req.setAttribute(REQ_MATCH_URI_DYN, uripart);	
 		}
-		return null;
+		return result;
 	}
-	
-	private static final ControllerMethod[] EMPTY_DCM=new ControllerMethod[0];
-	private static void resetDynamicUrls(ControllerMethod[][] urls)
-	{
-		for(int i = 0 ; i < urls.length ; ++i)
-		{
-			urls[i]= EMPTY_DCM;
+
+	private static final ControllerMethod[] EMPTY_DCM = new ControllerMethod[0];
+
+	private static void resetDynamicUrls(ControllerMethod[][] urls) {
+		for (int i = 0; i < urls.length; ++i) {
+			urls[i] = EMPTY_DCM;
 		}
 	}
-	public static void reset(){
+
+	public static void reset() {
 		getStaticUrls.clear();
 		postStaticUrls.clear();
 		putStaticUrls.clear();
@@ -200,7 +227,7 @@ public class WebHandlerContext {
 		resetDynamicUrls(postDynamicUrls);
 		resetDynamicUrls(putDynamicUrls);
 		resetDynamicUrls(deleteDynamicUrls);
-		
+
 	}
 
 }

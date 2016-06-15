@@ -29,8 +29,12 @@ public class ControllerMethod {
 	}
 
 	public boolean match(String[] urls) {
+		String target;
+		String source;
 		for (int i = 0; i < pathLen; ++i) {
-			if (this.dynamicUrl[i] != null && (!this.dynamicUrl.equals(urls[i])))
+			target = this.dynamicUrl[i];
+			source = urls[i];
+			if (target != null && (!target.equals(source)))
 				return false;
 		}
 		return true;
