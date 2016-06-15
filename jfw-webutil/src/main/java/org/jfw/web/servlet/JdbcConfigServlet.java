@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JdbcConfigServlet extends FilenameConfigServlet {
 	private static final long serialVersionUID = -6623944599398162432L;
@@ -62,7 +63,7 @@ public class JdbcConfigServlet extends FilenameConfigServlet {
 		return true;
 	}
 
-	protected void buildConfigWithJdbc(Properties props) {
+	protected void buildConfigWithJdbc(Map<String,String> props) {
 		try {
 			Class.forName(this.dirverClassname);
 			Connection con = DriverManager.getConnection(this.jdbcUrl, this.jdbcUsername, this.jdbcPassword);
@@ -107,7 +108,7 @@ public class JdbcConfigServlet extends FilenameConfigServlet {
 			super.buildBeanFactoryConfig();
 		
 		if (this.config == null)
-			this.config = new Properties();
+			this.config = new HashMap<String,String>();
 		if (this.initJdbcEvn()) {
 			this.buildConfigWithJdbc(this.config);
 		} else {

@@ -78,6 +78,8 @@ public class SelectListOperateCG extends DBOperateCG {
 
 				if (1 != i)
 					sb.append(" AND ");
+				else
+					sb.append(" WHERE ");
 				sb.append(col.getDbName()).append("=?");
 
 				try {

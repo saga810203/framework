@@ -61,37 +61,38 @@ public class WebHandlerContext {
 		}
 
 		String url = wre.getUri().trim().substring(1).intern();
+		String methodType = wre.getMethodType();
 
 		String[] dynamicUrl = matchDynamicUrl(url);
 		Object handler = wre.getWebHandler();
 		if (dynamicUrl == null) {
 			ControllerMethod cm = new ControllerMethod(handler, method);
-			if (wre.getMethodName().equalsIgnoreCase("GET")) {
+			if ("GET".equalsIgnoreCase(methodType)) {
 				getStaticUrls.put(url, cm);
-			} else if (wre.getMethodName().equalsIgnoreCase("POST")) {
+			} else if ("POST".equalsIgnoreCase(methodType)) {
 				postStaticUrls.put(url, cm);
-			} else if (wre.getMethodName().equalsIgnoreCase("DELETE")) {
+			} else if ("DELETE".equalsIgnoreCase(methodType)) {
 				deleteStaticUrls.put(url, cm);
-			} else if (wre.getMethodName().equalsIgnoreCase("PUT")) {
+			} else if ("PUT".equalsIgnoreCase(methodType)) {
 				putStaticUrls.put(url, cm);
 			} else {
 				return false;
 			}
 		} else {
 			ControllerMethod cm = new ControllerMethod(handler, method, dynamicUrl);
-			if (wre.getMethodName().equalsIgnoreCase("GET")) {
+			if ("GET".equalsIgnoreCase(methodType)) {
 				ControllerMethod[] cms = extendArray(getDynamicUrls[dynamicUrl.length]);
 				cms[cms.length - 1] = cm;
 				getDynamicUrls[dynamicUrl.length] = cms;
-			} else if (wre.getMethodName().equalsIgnoreCase("POST")) {
+			} else if ("POST".equalsIgnoreCase(methodType)) {
 				ControllerMethod[] cms = extendArray(postDynamicUrls[dynamicUrl.length]);
 				cms[cms.length - 1] = cm;
 				postDynamicUrls[dynamicUrl.length] = cms;
-			} else if (wre.getMethodName().equalsIgnoreCase("DELETE")) {
+			} else if ("DELETE".equalsIgnoreCase(methodType)) {
 				ControllerMethod[] cms = extendArray(deleteDynamicUrls[dynamicUrl.length]);
 				cms[cms.length - 1] = cm;
 				deleteDynamicUrls[dynamicUrl.length] = cms;
-			} else if (wre.getMethodName().equalsIgnoreCase("PUT")) {
+			} else if ("PUT".equalsIgnoreCase(methodType)) {
 				ControllerMethod[] cms = extendArray(putDynamicUrls[dynamicUrl.length]);
 				cms[cms.length - 1] = cm;
 				putDynamicUrls[dynamicUrl.length] = cms;
@@ -104,7 +105,11 @@ public class WebHandlerContext {
 
 	public static ControllerMethod findWithGetMethod(HttpServletRequest req, int prefixLen) {
 		String uri = WebUtil.normalize(req.getRequestURI());
+		try{
 		uri = uri.substring(prefixLen);
+		}catch(java.lang.StringIndexOutOfBoundsException e){
+			uri = "";
+		}
 		ControllerMethod result = getStaticUrls.get(uri);
 		if (null != result) {
 			req.setAttribute(REQ_MATCH_URI, uri);

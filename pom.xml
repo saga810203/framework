@@ -9,6 +9,9 @@
 		<module>jfw-util</module>
 		<module>jfw-webutil</module>
 		<module>jfw-apt</module>
+		<module>demo-dao</module>
+		<module>demo-service</module>
+		<module>demo-web</module>
 	</modules>
 	<properties>
 	</properties>

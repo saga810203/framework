@@ -37,6 +37,7 @@ public class ClassBeanDefine extends BeanDefine {
 
 	private Method findMethod(String methodName, ValueDefine vd) throws ConfigException {
 		Method method = null;
+		Class<?> baseClass =  null;
 		for (Method m : clazz.getMethods()) {
 			if (m.getName().equals(methodName) && m.getParameterTypes().length == 1) {
 				if (vd.getValueClass() == null) {
@@ -53,9 +54,18 @@ public class ClassBeanDefine extends BeanDefine {
 						method = m;
 					}
 				} else {
-					if (m.getParameterTypes()[0].equals(vd.getValueClass())) {
+					Class<?> mClass = m.getParameterTypes()[0];
+					if (mClass.equals(vd.getValueClass())) {
 						method = m;
 						break;
+					}else if(mClass.isAssignableFrom(vd.getValueClass())){
+						if(method == null){
+							method = m;
+							baseClass= mClass;
+						}else if(baseClass.isAssignableFrom(mClass)){
+							method = m;
+							baseClass= mClass;
+						}	
 					}
 				}
 			}
@@ -70,8 +80,7 @@ public class ClassBeanDefine extends BeanDefine {
 		int index = attrName.indexOf("::");
 		if (index > 0) {
 			className = attrName.substring(index + 2);
-		} else {
-			attrName = attrName.substring(0, index);
+			attrName =  attrName.substring(0, index);
 		}
 		boolean isRef = attrName.endsWith("-ref");
 		if (isRef) {
@@ -83,17 +92,17 @@ public class ClassBeanDefine extends BeanDefine {
 				throw new ConfigException("duplicate bean attribute[" + attrName + "]");
 		}
 
-		Class<?> clazz = null;
+		Class<?> cls = null;
 		if (className != null && className.trim().length() > 0) {
-			clazz = ValueDefine.converToValueClass(className.trim());
+			cls = ValueDefine.converToValueClass(className.trim());
 		}
-		ValueDefine vd = ValueDefine.build(bf, attrName, clazz, isRef, attrVal);
+		ValueDefine vd = ValueDefine.build(bf, attrName, cls, isRef, attrVal);
 		
 		Method method = this.findMethod(methodName, vd);
-		if(method==null) throw new ConfigException("not found attribute[" + attrName + "] in class["+clazz.getName()+"]");
+		if(method==null) throw new ConfigException("not found attribute[" + attrName + "] in class["+this.clazz.getName()+"]");
 
 		if (isRef){
-			if(!this.addDependBean(attrVal)){
+			if(!this.addDependBean(attrVal.trim())){
 				 throw new ConfigException("not found ref bean[" + attrVal + "]");
 			}
 		}
@@ -121,17 +130,20 @@ public class ClassBeanDefine extends BeanDefine {
 			} catch (Exception e) {
 				throw new RuntimeException("create class[" + clazz.getName() + "] instance error:", e);
 			}
+			return result;
+		}
+
+		@Override
+		public void config(Object obj, BeanFactory bf) {
+			
 			if(!attrs.isEmpty())
 			for(Map.Entry<Method, ValueDefine> entry:attrs.entrySet()){
 				try {
-					entry.getKey().invoke(result,entry.getValue().getValue(bf));
+					entry.getKey().invoke(obj,entry.getValue().getValue(bf));
 				} catch (Exception e) {
 					throw new RuntimeException("set attibute[" + entry.getValue().getName() + "] error:", e);
 				}
 			}
-
-
-			return result;
 		}
 	}
 

@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
-import java.util.Properties;
 
 import org.jfw.util.bean.define.BeanDefine;
 import org.jfw.util.bean.define.ClassBeanDefine;
@@ -15,9 +15,10 @@ import org.jfw.util.bean.define.ConfigException;
 import org.jfw.util.bean.define.FactoryBeanBuilder;
 import org.jfw.util.bean.define.MapBeanDefine;
 import org.jfw.util.bean.define.StaticBuildBeanDefine;
+import org.jfw.util.sort.DependSortService;
 
 /**
- * beanid=classname //singleto bean beanid::prototype=classname //prototype bean
+ * beanid=classname
  * 
  * beanid::build=classname //create bean by static method step 1
  * beanid.build-method=methodname //create bean by static method step 2
@@ -46,13 +47,9 @@ import org.jfw.util.bean.define.StaticBuildBeanDefine;
  */
 public class BeanFactory {
 	public Object getBean(String id) {
-		Object result = this.singleton.get(id);
+		Object result = this.eles.get(id);
 		if (result == null) {
-			BeanBuilder bd = this.beanBuilders.get(id);
-			if (bd != null)
-				result = bd.build(this);
-			else if (this.parent != null)
-				result = this.parent.getBean(id);
+			result = this.parent.getBean(id);
 		}
 		return result;
 	}
@@ -60,40 +57,33 @@ public class BeanFactory {
 	@SuppressWarnings("unchecked")
 	public <T> T getBean(String id, Class<T> clazz) {
 		Object result = this.getBean(id);
-		if (null == result && (null != this.parent))
-			result = parent.getBean(id);
 		if (null != result && clazz.isAssignableFrom(result.getClass())) {
 			return (T) result;
 		}
 		return null;
 	}
 
-	public List<Object> getBeansWithGroup(String groupname){
+	public List<Object> getBeansWithGroup(String groupname) {
 		List<Object> result = new ArrayList<Object>();
-		if(this.groups!=null){
+		if (this.groups != null) {
 			List<String> list = this.groups.get(groupname);
-			if(list!=null){
-				for(String s:list){
+			if (list != null) {
+				for (String s : list) {
 					result.add(this.getBean(s));
 				}
 			}
 		}
-		if(this.parent!=null)
-		result.addAll(this.parent.getBeansWithGroup(groupname));
+		if (this.parent != null)
+			result.addAll(this.parent.getBeansWithGroup(groupname));
 		return result;
 	}
-	public List<String> getBeanIdsWithGroup(String groupname){
+
+	public List<String> getBeanIdsWithGroup(String groupname) {
 		return this.groups.get(groupname);
 	}
 
-	
-
 	public boolean contains(String beanid) {
 		return this.names.contains(beanid) || (this.parent != null && this.parent.contains(beanid));
-	}
-
-	public boolean isSingletonBean(String beanid) {
-		return this.names4Singleton.contains(beanid) || (null != this.parent && this.parent.isSingletonBean(beanid));
 	}
 
 	public List<String> listBeanName() {
@@ -117,13 +107,16 @@ public class BeanFactory {
 		if (this.contains(beanid))
 			throw new RuntimeException("Duplicate BeanId[" + beanid + "]");
 		this.names.add(beanid);
-		if (key.indexOf("::prototype") < 0)
-			this.names4Singleton.add(beanid);
 	}
 
 	protected void fillBeanNames(Map<String, String> beans) {
 		for (String key : beans.keySet()) {
-			this.addBeanId(key);
+			int index = key.indexOf("::");
+			if (index < 0) {
+				this.addBeanId(key);
+			} else {
+				this.addBeanId(key.substring(0, index));
+			}
 		}
 	}
 
@@ -180,8 +173,41 @@ public class BeanFactory {
 				throw new InValidBeanConfigException(bd.getKey(), bd.getValue(), "exists nested ref");
 		}
 	}
+	
+	
+	private static void preSort(List<BeanDefine> list,BeanDefine bd,Map<BeanDefine,List<BeanDefine>> depMap){
+		List<String> dns = bd.getDependBeans();
+		if(dns==null || dns.isEmpty()) return;
+		List<BeanDefine> bds = new LinkedList<BeanDefine>();
+		depMap.put(bd, bds);
+		for(String s:dns){
+			for(BeanDefine b:list){
+				if(s.equals(b.getName()))
+					bds.add(b);
+			}
+		}
+	}
+	
+	private static List<BeanDefine> sort(List<BeanDefine> list){
+		DependSortService<BeanDefine> dss = new DependSortService<BeanDefine>();
+		Map<BeanDefine,List<BeanDefine>> depMap = new HashMap<BeanDefine,List<BeanDefine>>();
+		for(BeanDefine bd:list){
+			preSort(list,bd,depMap)	;	
+		}
+		dss.add(list, depMap);
+		return dss.sort();		
+	}
+	
+	private static void handleGroup(BeanDefine  bd,BeanFactory bf ){
+		List<String> gns = bd.getGroupNames();
+		if(gns!=null && !gns.isEmpty()){
+			for(String gn:gns){
+				bf.addGroupElement(gn, bd.getName());
+			}
+		}
+	}
 
-	public static BeanFactory build(BeanFactory parent, Properties config)
+	public static BeanFactory build(BeanFactory parent, Map<String, String> config)
 			throws InValidBeanConfigException, ConfigException {
 		Map<String, String> beans = new HashMap<String, String>();
 		Map<String, String> attrs = new HashMap<String, String>();
@@ -192,51 +218,50 @@ public class BeanFactory {
 		result.fillBeanNames(beans);
 		List<BeanDefine> bds = buildBeanDefines(result, beans, attrs);
 		ckeckNestedRef(bds);
-		for (BeanDefine bd : bds) {
-			BeanBuilder builder = bd.buildBeanBuilder(result);
-			if (bd.isSingleton()) {
-				result.singleton.put(bd.getName(), builder.build(result));
-			} else {
-				result.beanBuilders.put(bd.getName(), builder);
-			}
-			if (bd.getGroupName() != null) {
-				result.addGroupElement(bd.getGroupName(), bd.getName());
-			}
+		bds = sort(bds);		
+
+		for(ListIterator<BeanDefine> it = bds.listIterator(); it.hasNext();){
+			BeanDefine bd = it.next();
+			BeanBuilder bb = bd.buildBeanBuilder(result);
+			Object obj = bb.build(result);
+			bb.config(obj, result);
+			result.eles.put(bd.getName(), obj);
+			
+			handleGroup(bd, result);
 		}
+		
 		return result;
 	}
 
-	protected static void fillBeanAndAttribute(Properties config, Map<String, String> beans, Map<String, String> attrs)
-			throws InValidBeanConfigException {
-		for (Map.Entry<Object, Object> entry : config.entrySet()) {
-			String key = (String) entry.getKey();
-			String value = (String) entry.getValue();
+	protected static void fillBeanAndAttribute(Map<String, String> config, Map<String, String> beans,
+			Map<String, String> attrs) throws InValidBeanConfigException {
+		for (Map.Entry<String, String> entry : config.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
 			int index = key.indexOf("::");
 			String name = key;
-			if (index >= 0) {
-				if (index == 0)
-					raiseConfigException(key, value);
-			} else {
+			if (index == 0)
+				raiseConfigException(key, value);
+
+			if (index > 0)
 				name = key.substring(0, index);
-				index = name.indexOf(".");
-				if (index < 0) {
-					beans.put(key, value);
-				} else if (index == 0) {
-					raiseConfigException(key, value);
-				} else {
-					attrs.put(key, value);
-				}
+			index = name.indexOf(".");
+			if (index < 0) {
+				beans.put(key, value);
+			} else if (index == 0) {
+				raiseConfigException(key, value);
+			} else {
+				attrs.put(key, value);
 			}
+
 		}
 	}
 
-	private Map<String, Object> singleton = new HashMap<String, Object>();
-	private Map<String, BeanBuilder> beanBuilders = new HashMap<String, BeanBuilder>();
+	private Map<String, Object> eles = new HashMap<String, Object>();
 
 	private BeanFactory parent = null;
 
 	private List<String> names = new ArrayList<String>();
-	private List<String> names4Singleton = new ArrayList<String>();
 	private Map<String, List<String>> groups;
 
 	protected BeanFactory() {

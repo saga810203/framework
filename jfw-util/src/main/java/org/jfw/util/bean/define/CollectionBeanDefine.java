@@ -140,16 +140,21 @@ public class CollectionBeanDefine extends BeanDefine {
 			} catch (Exception e) {
 				throw new RuntimeException("invald classname[" + clazz.getName() + "] instance error", e);
 			}
+			return result;
+		}
+
+		@Override
+		public void config(Object obj, BeanFactory bf) {
 			if (this.values != null) {
 				for (ListIterator<ValueDefine> it = values.listIterator(); it.hasNext();) {
 					try {
-						method.invoke(result, it.next().getValue(bf));
+						method.invoke(obj, it.next().getValue(bf));
 					} catch (Exception e) {
 						throw new RuntimeException("invoke method[" + clazz.getName() + ".add(Object obj)]", e);
 					}
 				}
 			}
-			return result;
+			
 		}
 
 	}

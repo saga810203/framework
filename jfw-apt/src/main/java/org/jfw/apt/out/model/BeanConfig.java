@@ -8,7 +8,7 @@ public class BeanConfig {
 		if (id == null || id.trim().length() == 0)
 			id = classname.trim().replaceAll("\\.", "_");
 		for (Entry entry : this.entrys) {
-			if (entry.getType().equals("class") && entry.id.equals(classname))
+			if (entry.getType().equals("class") && entry.id.equals(id))
 				return (ClassBeanDefine) entry.getBd();
 		}
 		ClassBeanDefine cbd = new ClassBeanDefine(classname);

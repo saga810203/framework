@@ -31,7 +31,7 @@ public class FactoryBeanBuilder extends BeanDefine implements BeanBuilder {
 		if (attrName.equals("factory-method")) {
 			this.method = attrVal;
 		}
-
+		this.addDependBean(this.beanid);
 	}
 
 	@Override
@@ -50,6 +50,10 @@ public class FactoryBeanBuilder extends BeanDefine implements BeanBuilder {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public void config(Object obj, BeanFactory bf) {
 	}
 
 }

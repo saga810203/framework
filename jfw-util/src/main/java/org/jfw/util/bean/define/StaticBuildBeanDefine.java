@@ -62,6 +62,9 @@ public class StaticBuildBeanDefine extends BeanDefine {
 				throw new RuntimeException("invoke method[" + className + "."+method.getName()+"()]", e);
 			}
 		}
+		@Override
+		public void config(Object obj, BeanFactory bf) {			
+		}
 		
 	}
 

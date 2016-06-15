@@ -2,6 +2,7 @@ package org.jfw.util.bean.define;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +13,10 @@ import org.jfw.util.bean.InValidBeanConfigException;
 public abstract class BeanDefine {
 	private static final String LIST_GROUP = "list-group-";
 	private BeanFactory factory;    	
-	private boolean singleton = true;
 	private String key;
 	private String name;
 	private String value;
-	private String groupName = null;;
+	private List<String> groupNames = null;
 	
 
 	private List<String> depends = new ArrayList<String>();	
@@ -27,11 +27,11 @@ public abstract class BeanDefine {
 		this.value = value;
 		List<String> list = BeanFactory.split(key,"::", false);		
 		this.name= list.get(0);
-		this.singleton = !list.contains("prototype");
 		for(int i = 1; i < list.size(); ++i){
 			String s = list.get(i);
 			if(s.startsWith(LIST_GROUP)&& !s.equals(LIST_GROUP)){
-				this.groupName = s.substring(LIST_GROUP.length());
+				if(this.groupNames==null) this.groupNames = new LinkedList<String>();				
+				this.groupNames.add(s.substring(LIST_GROUP.length()));
 			}
 		}
 	}
@@ -96,8 +96,8 @@ public abstract class BeanDefine {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getGroupName() {
-		return groupName;
+	public List<String> getGroupNames() {
+		return this.groupNames==null ?Collections.<String>emptyList():this.groupNames;
 	}
 	public String getValue() {
 		return value;
@@ -106,12 +106,4 @@ public abstract class BeanDefine {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
-	public boolean isSingleton() {
-		return singleton;
-	}
-
-	public void setSingleton(boolean singleton) {
-		this.singleton = singleton;
-	} 
 }

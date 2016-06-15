@@ -8,9 +8,12 @@
 	</parent>
 	<artifactId>jfw-apt</artifactId>
 	<properties>
-		 <maven.compiler.useIncrementalCompilation>false</maven.compiler.useIncrementalCompilation>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
+	<dependencies>
+
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
