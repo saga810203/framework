@@ -71,7 +71,7 @@ public final class OrmBoolean extends BaseOrmHandler {
 	public void writeValue(StringBuilder sb, boolean dynamicValue) {
 		this.checkParamIndex(sb, localVarInMethod);
 		if (null == this.isNullVariable) {
-			sb.append("ps.setString(paramIndex++,");
+			sb.append("ps.setString(_index++,");
 			if (null == cacheValueVariable) {
 				sb.append(this.valueEl);
 			} else {
@@ -80,7 +80,7 @@ public final class OrmBoolean extends BaseOrmHandler {
 			sb.append(".booleanValue()?\"1\":\"0\");\r\n");
 		} else {
 			if (dynamicValue) {
-				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.setString(paramIndex++,");
+				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.setString(_index++,");
 				if (null == cacheValueVariable) {
 					sb.append(this.valueEl);
 				} else {
@@ -89,9 +89,9 @@ public final class OrmBoolean extends BaseOrmHandler {
 				sb.append(".booleanValue()?\"1\":\"0\");\r\n}\r\n");
 			} else {
 
-				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.setNull(paramIndex++,")
+				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.setNull(_index++,")
 						.append(java.sql.Types.CHAR).append(");\r\n").append("}else{\r\n")
-						.append("ps.setString(paramIndex++,");
+						.append("ps.setString(_index++,");
 				if (null == cacheValueVariable) {
 					sb.append(this.valueEl);
 				} else {

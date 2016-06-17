@@ -86,7 +86,7 @@ public class OrmBlob extends BaseOrmHandler {
 		this.checkParamIndex(sb, localVarInMethod);
 
 		if (null == this.isNullVariable) {
-			sb.append("ps.setBytes(paramIndex++,");
+			sb.append("ps.setBytes(_index++,");
 			if (null == cacheValueVariable) {
 				sb.append(this.valueEl);
 			} else {
@@ -95,7 +95,7 @@ public class OrmBlob extends BaseOrmHandler {
 			sb.append(");\r\n");
 		} else {
 			if (dynamicValue) {
-				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.setBytes(paramIndex++,");
+				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.setBytes(_index++,");
 				if (null == cacheValueVariable) {
 					sb.append(this.valueEl);
 				} else {
@@ -104,7 +104,7 @@ public class OrmBlob extends BaseOrmHandler {
 				sb.append(");\r\n}\r\n");
 			} else {
 				sb.append("if(").append(this.isNullVariable).append("){\r\n")
-				.append("ps.setNull(paramIndex++,java.sql.Types.BLOB);\r\n").append("}else{\r\n").append("ps.setBytes(paramIndex++,");
+				.append("ps.setNull(_index++,java.sql.Types.BLOB);\r\n").append("}else{\r\n").append("ps.setBytes(_index++,");
 				if (null == cacheValueVariable) {
 					sb.append(this.valueEl);
 				} else {

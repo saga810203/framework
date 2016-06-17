@@ -14,6 +14,7 @@ public class SelectOneOperateCG  extends DBOperateCG {
 	private PersistentObject bean;
 
 	private OrmHandler[] fieldHandlers;
+	private Column[] queryColumns;
 
 	private OrmHandler[] whereHandlers;
 
@@ -34,11 +35,13 @@ public class SelectOneOperateCG  extends DBOperateCG {
 					"this mehtod return type not is a  invalid persistentObject(kind = TABLE or EXTEND_TABLE)");
 		}
 
-		List<Column> list = this.bean.getAllColumn();
+		List<Column> list = this.bean.getQueryColumn();
+		this.queryColumns = new Column[list.size()];
 		this.fieldHandlers = new OrmHandler[list.size()];
 		for (int i = 0; i < list.size(); ++i) {
+			this.queryColumns[i] = list.get(i);
 			try {
-				this.fieldHandlers[i] = (OrmHandler) list.get(i).getDataElement().getHandlerClass().newInstance();
+				this.fieldHandlers[i] = (OrmHandler) this.queryColumns[i].getDataElement().getHandlerClass().newInstance();
 			} catch (Exception ee) {
 				String m = ee.getMessage();
 				throw new AptException(ref, "can't create ormHandler instance:" + m == null ? "" : m);
@@ -130,10 +133,9 @@ public class SelectOneOperateCG  extends DBOperateCG {
 			sb.append("if(rs.next()){");
 			
 				sb.append(" result = new ").append(this.returnType).append("();");
-				List<Column> list = this.bean.getAllColumn();
 				for (int i = 0; i < this.fieldHandlers.length; ++i) {
-					this.fieldHandlers[i].readValue(sb, "result." + list.get(i).getSetter() + "(", ");", i + 1,
-							list.get(i).isNullable(), this.attributes);
+					this.fieldHandlers[i].readValue(sb, "result." + this.queryColumns[i].getSetter() + "(", ");", i + 1,
+							this.queryColumns[i].isNullable(), this.attributes);
 				}
 			sb.append("}");
 

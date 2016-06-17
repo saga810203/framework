@@ -15,6 +15,7 @@ public class QueryOperateCG extends DBOperateCG {
 	private PersistentObject bean;
 
 	private OrmHandler[] fieldHandlers;
+	private Column[] queryColumns;
 
 	private WhereSentence where;
 
@@ -43,10 +44,13 @@ public class QueryOperateCG extends DBOperateCG {
 			if (this.bean == null)
 				throw new AptException(ref, "this mehtod return type not is a persistentObject  in this project");
 
-			List<Column> list = this.bean.getAllColumn();
+			List<Column> list = this.bean.getQueryColumn();
+			
 			this.fieldHandlers = new OrmHandler[list.size()];
+			this.queryColumns = new Column[list.size()];
 			for (int i = 0; i < list.size(); ++i) {
 				try {
+					this.queryColumns[i] = list.get(i);
 					this.fieldHandlers[i] = (OrmHandler) list.get(i).getDataElement().getHandlerClass().newInstance();
 				} catch (Exception ee) {
 					String m = ee.getMessage();
@@ -177,10 +181,9 @@ public class QueryOperateCG extends DBOperateCG {
 						this.attributes);
 			} else {
 				sb.append(this.realReturnType).append(" obj = new ").append(this.realReturnType).append("();");
-				List<Column> list = this.bean.getAllColumn();
 				for (int i = 0; i < this.fieldHandlers.length; ++i) {
-					this.fieldHandlers[i].readValue(sb, "obj." + list.get(i).getSetter() + "(", ");", i + 1,
-							list.get(i).isNullable(), this.attributes);
+					this.fieldHandlers[i].readValue(sb, "obj." + queryColumns[i].getSetter() + "(", ");", i + 1,
+							queryColumns[i].isNullable(), this.attributes);
 				}
 
 				sb.append("result.add(obj);");
@@ -200,10 +203,9 @@ public class QueryOperateCG extends DBOperateCG {
 			} else {
 				sb.append("result = new ").append(this.realReturnType).append("();");
 
-				List<Column> list = this.bean.getAllColumn();
 				for (int i = 0; i < this.fieldHandlers.length; ++i) {
-					this.fieldHandlers[i].readValue(sb, "result." + list.get(i).getSetter() + "(", ");", i + 1,
-							list.get(i).isNullable(), this.attributes);
+					this.fieldHandlers[i].readValue(sb, "result." + queryColumns[i].getSetter() + "(", ");", i + 1,
+							queryColumns[i].isNullable(), this.attributes);
 				}
 			}
 			sb.append("}");

@@ -21,6 +21,7 @@ public class PageQueryOperateCG extends DBOperateCG {
 	private PersistentObject bean;
 
 	private OrmHandler[] fieldHandlers;
+	private Column[] queryColumns;
 
 	private WhereSentence where;
 
@@ -59,10 +60,12 @@ public class PageQueryOperateCG extends DBOperateCG {
 		if (this.bean == null)
 			throw new AptException(ref, "this mehtod return type not is a persistentObject  in this project");
 
-		List<Column> list = this.bean.getAllColumn();
+		List<Column> list = this.bean.getQueryColumn();
 		this.fieldHandlers = new OrmHandler[list.size()];
+		this.queryColumns = new Column[list.size()];
 		for (int i = 0; i < list.size(); ++i) {
 			try {
+				this.queryColumns[i] = list.get(i);
 				this.fieldHandlers[i] = (OrmHandler) list.get(i).getDataElement().getHandlerClass().newInstance();
 			} catch (Exception ee) {
 				String m = ee.getMessage();
@@ -148,10 +151,9 @@ public class PageQueryOperateCG extends DBOperateCG {
 		sb.append("while(rs.next()){");
 
 		sb.append(this.realReturnType).append(" obj = new ").append(this.realReturnType).append("();");
-		List<Column> list = this.bean.getAllColumn();
 		for (int i = 0; i < this.fieldHandlers.length; ++i) {
-			this.fieldHandlers[i].readValue(sb, "obj." + list.get(i).getSetter() + "(", ");", i + 1,
-					list.get(i).isNullable(), this.attributes);
+			this.fieldHandlers[i].readValue(sb, "obj." + this.queryColumns[i].getSetter() + "(", ");", i + 1,
+					this.queryColumns[i].isNullable(), this.attributes);
 		}
 
 		sb.append("_pList.add(obj);").append("++ _num4Row;if(_num4Row == pageSize) break;");

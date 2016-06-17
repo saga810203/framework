@@ -77,13 +77,13 @@ public class AbstractMethodGenerater {
 		return ref;
 	}
 
-	private static final String TVN = AbstractMethodGenerater.class.getName()+"_TVN";
+	public static final String TVN = AbstractMethodGenerater.class.getName()+"_TVN";
 	public String getTempalteVariableName(){
 		Object obj = this.attributes.get(TVN);
 		int i = obj==null?0:((Integer)obj).intValue();		
 		++i;
 		this.attributes.put(TVN,i);
-		return "tmp"+i;		
+		return "_tmp"+i;		
 	}
 	
 	public String getReturnType() {

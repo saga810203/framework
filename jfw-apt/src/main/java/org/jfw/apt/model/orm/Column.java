@@ -86,18 +86,22 @@ public class Column {
 	}
 
 	public String getColumnDefine() {
-		if (null != this.dbType)
-			return this.dbType + " NOT NULL";
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.dbName).append(" ").append(this.de.getDbType());
-		if (this.de.getDbTypeLength() > 0) {
-			sb.append("(").append(this.de.getDbTypeLength());
-			if (this.de.getDbTypePrecision() >= 0) {
-				sb.append(",").append(this.de.getDbTypePrecision());
+		sb.append(this.dbName).append(" ");
+		if (null != dbType)
+			sb.append(dbType);
+		else {
+			sb.append(this.de.getDbType());
+			if (this.de.getDbTypeLength() > 0) {
+				sb.append("(").append(this.de.getDbTypeLength());
+				if (this.de.getDbTypePrecision() >= 0) {
+					sb.append(",").append(this.de.getDbTypePrecision());
+				}
+				sb.append(")");
 			}
-			sb.append(")");
 		}
 		if (!this.nullable)
+
 			sb.append(" NOT NULL");
 		return sb.toString();
 	}

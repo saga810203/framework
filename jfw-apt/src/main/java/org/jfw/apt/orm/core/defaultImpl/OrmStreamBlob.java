@@ -76,7 +76,7 @@ public class OrmStreamBlob extends BaseOrmHandler {
 			sb.append(this.blobName).append(" =  con.createBlob();\r\n");
 			sb.append("org.jfw.util.io.IoUtil.copy(").append(this.getValueVariable()).append(",").append(this.blobName)
 					.append(".setBinaryStream(1),true,true);");
-			sb.append("ps.setBlob(paramIndex++,").append(this.blobName).append(");\r\n");
+			sb.append("ps.setBlob(_index++,").append(this.blobName).append(");\r\n");
 		} else {
 
 			if (dynamicValue) {
@@ -84,15 +84,15 @@ public class OrmStreamBlob extends BaseOrmHandler {
 				sb.append(this.blobName).append(" =  con.createBlob();\r\n");
 				sb.append("org.jfw.util.io.IoUtil.copy(").append(this.getValueVariable()).append(",")
 						.append(this.blobName).append(".setBinaryStream(1),true,true);");
-				sb.append("ps.setBlob(paramIndex++,").append(this.blobName);
+				sb.append("ps.setBlob(_index++,").append(this.blobName);
 				sb.append(");\r\n}\r\n");
 			} else {
 				sb.append("if(").append(this.isNullVariable).append("){\r\n")
-						.append("ps.setNull(paramIndex++,java.sql.Types.BLOB);\r\n").append("}else{\r\n");
+						.append("ps.setNull(_index++,java.sql.Types.BLOB);\r\n").append("}else{\r\n");
 				sb.append(this.blobName).append(" =  con.createBlob();\r\n");
 				sb.append("org.jfw.util.io.IoUtil.copy(").append(this.getValueVariable()).append(",")
 						.append(this.blobName).append(".setBinaryStream(1),true,true);");
-				sb.append("ps.setBlob(paramIndex++,").append(this.blobName);
+				sb.append("ps.setBlob(_index++,").append(this.blobName);
 				sb.append(");\r\n}\r\n");
 			}
 		}

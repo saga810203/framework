@@ -42,8 +42,8 @@ public class UnOrmBoolean extends BaseOrmHandler {
 	@Override
 	public void writeValue(StringBuilder sb,boolean dynamicValue) {
 		this.checkParamIndex(sb, lmap);
-		sb.append("if(").append(this.valueEl).append("){\r\n").append("ps.setString(paramIndex++,\"1\");\r\n}else{\r\n")
-				.append("ps.setString(paramIndex++,\"0\");\r\n}\r\n");
+		sb.append("if(").append(this.valueEl).append("){\r\n").append("ps.setString(_index++,\"1\");\r\n}else{\r\n")
+				.append("ps.setString(_index++,\"0\");\r\n}\r\n");
 	}
 
 	@Override

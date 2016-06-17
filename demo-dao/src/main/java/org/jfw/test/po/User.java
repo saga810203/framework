@@ -1,5 +1,7 @@
 package org.jfw.test.po;
 
+import java.io.InputStream;
+
 import org.jfw.apt.annotation.orm.Column;
 import org.jfw.apt.annotation.orm.Table;
 import org.jfw.apt.annotation.orm.Unique;
@@ -20,6 +22,12 @@ public class User extends EnabledPO {
 	@Column(value=DE.String_de)
 	private String commm;
 	
+	@Column(value=DE.StreamBlob,defaultQuery=false)
+	private InputStream image;
+	
+	public InputStream getImage() {
+		return image;
+	}
 	public String getCommm() {
 		return commm;
 	}

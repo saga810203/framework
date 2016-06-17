@@ -3,7 +3,6 @@ package org.jfw.apt.model.orm;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jfw.apt.Utils;
 import org.jfw.apt.annotation.orm.Insert;
 import org.jfw.apt.exception.AptException;
 
@@ -30,7 +29,7 @@ public class InsertOperateCG extends DBOperateCG {
 		if (this.po.getKind() != PersistentObjectKind.TABLE)
 			throw new AptException(ref,
 					"this method(@Insert) second parameter must be a PersistentObject(kind == TABLE)");
-		this.columns = po.getAllColumn();
+		this.columns = po.getInsertColumn();
 		this.initOrmHandlers();
 		this.buildStaticSQL();
 
@@ -39,8 +38,6 @@ public class InsertOperateCG extends DBOperateCG {
 	private void initOrmHandlers() throws AptException {
 		for (int i = 0; i < this.columns.size(); ++i) {
 			Column col = this.columns.get(i);
-			if (!col.isInsertable())
-				continue;
 			if (null != col.getFixInsertSqlValue())
 				continue;
 			col.initHandler(ref);
@@ -58,8 +55,6 @@ public class InsertOperateCG extends DBOperateCG {
 		boolean firstColumn = true;
 		for (int i = 0; i < this.columns.size(); ++i) {
 			Column col = this.columns.get(i);
-			if (!col.isInsertable())
-				continue;
 			if (firstColumn) {
 				firstColumn = false;
 			} else {
@@ -71,14 +66,12 @@ public class InsertOperateCG extends DBOperateCG {
 		firstColumn = true;
 		for (int i = 0; i < this.columns.size(); ++i) {
 			Column col = this.columns.get(i);
-			if (!col.isInsertable())
-				continue;
 			if (firstColumn) {
 				firstColumn = false;
 			} else {
 				sb.append(",");
 			}
-			String value = Utils.emptyToNull(col.getFixInsertSqlValue());
+			String value = col.getFixInsertSqlValue();
 			if (value == null) {
 				sb.append("?");
 			} else {
@@ -92,8 +85,6 @@ public class InsertOperateCG extends DBOperateCG {
 	protected void buildSqlParamter() {
 		for (int i = 0; i < this.columns.size(); ++i) {
 			Column col = this.columns.get(i);
-			if (!col.isInsertable())
-				continue;
 			if (null == col.getFixInsertSqlValue()) {
 				col.getHandler().writeValue(sb, false);
 			}

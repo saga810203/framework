@@ -9,7 +9,7 @@ public interface OrmHandler {
 	void readValue(StringBuilder sb,String beforCode,String afterCode,int colIndex,boolean dbNullable,Map<String,Object> localVarInMethod);
 
     //write   PreparedStatement ps;
-	//        int paramIndex = 1;
+	//        int _index = 1;
 	void init(String valueEl,boolean userTempalteVar,boolean vlaueNullable,Map<String,Object> localVarInMethod);
 	void prepare(StringBuilder sb);	
 	/*
@@ -22,7 +22,7 @@ public interface OrmHandler {
 	 * sb.append("}");	 * 
 	 */	
 	void checkNull(StringBuilder sb);	
-	//使用 "paramIndex++" 局部变量 
+	//使用 "_index++" 局部变量 
 	void writeValue(StringBuilder sb,boolean dynamicValue);
 	boolean isReplaceResource();
 	void replaceResource(StringBuilder sb);

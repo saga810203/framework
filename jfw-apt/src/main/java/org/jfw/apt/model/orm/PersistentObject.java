@@ -6,6 +6,7 @@ import static javax.lang.model.element.NestingKind.TOP_LEVEL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
@@ -241,15 +242,46 @@ public class PersistentObject {
 		return result;
 	}
 	
+	public List<Column> getInsertColumn(){
+		List<Column> result = new ArrayList<Column>();
+		for(ListIterator<Column> it = this.columns.listIterator();it.hasNext();){
+			Column c = it.next();
+			if(c.isInsertable()) result.add(c);
+		}
+		if(this.parent!=null) result.addAll(this.parent.getInsertColumn());
+		return result ;		
+	}
+	
+	public List<Column> getUpdateColumn(){
+		List<Column> result = new ArrayList<Column>();
+		for(ListIterator<Column> it = this.columns.listIterator();it.hasNext();){
+			Column c = it.next();
+			if(c.isRenewable()) result.add(c);
+		}
+		if(this.parent!=null) result.addAll(this.parent.getUpdateColumn());
+		return result ;		
+	}
+	
+	public List<Column> getQueryColumn(){
+		ArrayList<Column> result = new ArrayList<Column>();
+		for(ListIterator<Column> it = this.columns.listIterator();it.hasNext();){
+			Column c = it.next();
+			if(c.isInQuery()) result.add(c);
+		}
+		if(this.parent!=null) result.addAll(0, this.parent.getQueryColumn());
+		return result ;		
+	}
+	
+	
+	
 	public String getQueryFields()
 	{
 		StringBuilder sb = new StringBuilder();
 		boolean hascomma = false;
 		if(this.parent !=null){
-			List<Column> list = this.parent.getAllColumn();
+			List<Column> list = this.parent.getQueryColumn();
 			for(int i = 0 ; i < list.size() ; ++i){
 				Column col = list.get(i);
-				if(!col.isInQuery()) continue;
 				if(!hascomma){
 					hascomma = true;
 				}else{
@@ -262,8 +294,10 @@ public class PersistentObject {
 				}
 			}
 		}
-		for(int i = 0 ; i < this.columns.size() ; ++i){
-			Column col = this.columns.get(i);
+		
+		
+		for(ListIterator<Column> it = this.columns.listIterator();it.hasNext() ;){
+			Column col = it.next();
 			if(!col.isInQuery()) continue;
 			if(!hascomma){
 				hascomma = true;

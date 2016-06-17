@@ -1,5 +1,6 @@
 package org.jfw.test.dao;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.jfw.apt.annotation.orm.CustomDMLSQL;
 import org.jfw.apt.annotation.orm.DataBaseHandler;
 import org.jfw.apt.annotation.orm.Delete;
 import org.jfw.apt.annotation.orm.Insert;
+import org.jfw.apt.annotation.orm.InsertList;
 import org.jfw.apt.annotation.orm.Query;
 import org.jfw.apt.annotation.orm.SelectList;
 import org.jfw.apt.annotation.orm.SelectOne;
@@ -53,13 +55,13 @@ public interface UserDao {
 	
 
 	@Insert
-	int insert(Connection con, User user) throws SQLException;
+	int insert(Connection con, User user) throws SQLException,IOException;
 
 	@Update
-	int update(Connection con, User user) throws SQLException;
+	int update(Connection con, User user) throws SQLException,IOException;
 
 	@Update(dynamicValue = true)
-	int updateChoose(Connection con, User user) throws SQLException;
+	int updateChoose(Connection con, User user) throws SQLException,IOException;
 
 	@Delete
 	int delete(Connection con, User user) throws SQLException;
@@ -79,5 +81,10 @@ public interface UserDao {
 	List<User> queryList(Connection con,String id,String name) throws SQLException;
 	@SelectOne
 	User queryOne(Connection con,String id,String name) throws SQLException;
+	
+	@InsertList
+	int[] insert(Connection con,List<User> users) throws SQLException,IOException;
+	@InsertList
+	int[] insert(Connection con,User[] users) throws SQLException,IOException;
 
 }

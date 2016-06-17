@@ -78,7 +78,7 @@ public abstract class AbstractOrmHandler extends BaseOrmHandler {
 		this.checkParamIndex(sb, localVarInMethod);
 
 		if (null == this.isNullVariable) {
-			sb.append("ps.").append(this.getWriteMethod()).append("(paramIndex++,");
+			sb.append("ps.").append(this.getWriteMethod()).append("(_index++,");
 			if (null == cacheValueVariable) {
 				sb.append(this.valueEl);
 			} else {
@@ -88,7 +88,7 @@ public abstract class AbstractOrmHandler extends BaseOrmHandler {
 		} else {
 			if (dynamicValue) {
 				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.")
-						.append(this.getWriteMethod()).append("(paramIndex++,");
+						.append(this.getWriteMethod()).append("(_index++,");
 				if (null == cacheValueVariable) {
 					sb.append(this.valueEl);
 				} else {
@@ -96,9 +96,9 @@ public abstract class AbstractOrmHandler extends BaseOrmHandler {
 				}
 				sb.append(");\r\n}\r\n");
 			} else {
-				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.setNull(paramIndex++,")
+				sb.append("if(").append(this.isNullVariable).append("){\r\n").append("ps.setNull(_index++,")
 						.append(this.getSqlType()).append(");\r\n").append("}else{\r\n").append("ps.")
-						.append(this.getWriteMethod()).append("(paramIndex++,");
+						.append(this.getWriteMethod()).append("(_index++,");
 				if (null == cacheValueVariable) {
 					sb.append(this.valueEl);
 				} else {
