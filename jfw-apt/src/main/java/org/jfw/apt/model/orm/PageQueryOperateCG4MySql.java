@@ -2,6 +2,8 @@ package org.jfw.apt.model.orm;
 
 import java.util.List;
 
+import javax.lang.model.element.ExecutableElement;
+
 import org.jfw.apt.Utils;
 import org.jfw.apt.annotation.orm.PageQuery;
 import org.jfw.apt.exception.AptException;
@@ -199,7 +201,7 @@ public class PageQueryOperateCG4MySql  extends DBOperateCG {
 			sb.append("StringBuilder _tmpsql = sql;sql= new StringBuilder(); ").append("sql.append(\"SELECT (1) FROM ")
 					.append(this.bean.getFromSentence().trim()).append("\");\r\n")
 
-					.append("if(sql.length()>0){ sql.append(_tmpsql);}");
+					.append("if(_tmpsql.length()>0){ sql.append(_tmpsql);}");
 		} else {
 			if (this.staticWhereSql == null) {
 				sb.append("String sql =\"SELECT (1) FROM ").append(this.bean.getFromSentence().trim())
@@ -210,7 +212,7 @@ public class PageQueryOperateCG4MySql  extends DBOperateCG {
 						.append(" WHERE \"+_tmpsql;\r\n");
 			}
 		}
-		sb.append("try{ java.sql.PreparedStatement _pagePs = con.prepareStatement(sql");
+		sb.append("try{ java.sql.PreparedStatement ps = con.prepareStatement(sql");
 		if (this.dynamic) {
 			sb.append(".toString()");
 		}
@@ -218,9 +220,9 @@ public class PageQueryOperateCG4MySql  extends DBOperateCG {
 		sb.append("try{");
 		this.where.buildParam(sb);
 		sb.append(
-				"java.sql.ResultSet _pageRs = _pagePs.executeQuery();\r\ntry{if(_pageRs.next()){_total = _pageRs.getInt(1);}}")
+				"java.sql.ResultSet _pageRs = ps.executeQuery();\r\ntry{if(_pageRs.next()){_total = _pageRs.getInt(1);}}")
 				.append("finally{try{_pageRs.close();}catch(Exception e){}}")
-				.append("}finally{\r\ntry{_pagePs.close();}catch(Exception e){}\r\n}\r\n");
+				.append("}finally{\r\ntry{ps.close();}catch(Exception e){}\r\n}\r\n");
 
 		sb.append("result.setTotal(_total);")
 				.append("if(0== _total){result.setPageNo(1);result.setData(java.util.Collections.<")
@@ -250,5 +252,46 @@ public class PageQueryOperateCG4MySql  extends DBOperateCG {
 		this.where.replaceResource(sb);
 
 	}
-
+	public String getCode(ExecutableElement ref) throws AptException
+	{
+		this.ormDefine = (OrmDefine)this.getAttribute(OrmDefine.class.getName());
+		this.fillMeta(ref);
+		this.sb = new StringBuilder();
+		this.checkJdbc();
+		this.sb.append("@Override\r\n public ")	.append(this.returnType).append(" ").append(this.name).append("(");
+		for(int i = 0 ; i < this.params.size(); ++i){
+			if(i!=0) sb.append(",");
+			MethodParamEntry mpe = this.params.get(i);
+			sb.append(mpe.getTypeName()).append(" ").append(mpe.getName());
+		}
+		sb.append(")");
+		for(int i = 0 ; i < this.throwables.size() ; ++i){
+			if(i==0){
+				sb.append(" throws ");
+			}else{
+				sb.append(",");
+			}
+			sb.append(this.throwables.get(i));
+		}
+		sb.append(" {\r\n");
+		this.prepare();
+		boolean replaceSource = this.needRelaceResource();
+		if(replaceSource) sb.append("try{\r\n");
+		sb.append("ps = con.prepareStatement(sql");
+		if (this.dynamic) {
+			sb.append(".toString()");
+		}
+		sb.append(");\r\n");
+		sb.append("try{");
+		this.buildSqlParamter();
+		this.buildHandleResult();
+		sb.append("}finally{\r\ntry{ps.close();}catch(Exception e){}\r\n}\r\n");
+		if(replaceSource){
+			sb.append("}finally{");
+			this.relaceResource();
+			sb.append("}\r\n");
+		}
+		sb.append("}");			
+		return sb.toString();
+	}
 }
