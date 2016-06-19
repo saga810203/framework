@@ -218,11 +218,11 @@ public class PageQueryOperateCG4MySql  extends DBOperateCG {
 		sb.append("try{");
 		this.where.buildParam(sb);
 		sb.append(
-				"java.sql.ResultSet _pageRs = ps.executeQuery();\r\ntry{if(_pageRs.next()){_total = _pageRs.getInt(1);}}")
-				.append("finally{try{_pageRs.close()}catch(Exception e){}}")
+				"java.sql.ResultSet _pageRs = _pagePs.executeQuery();\r\ntry{if(_pageRs.next()){_total = _pageRs.getInt(1);}}")
+				.append("finally{try{_pageRs.close();}catch(Exception e){}}")
 				.append("}finally{\r\ntry{_pagePs.close();}catch(Exception e){}\r\n}\r\n");
 
-		sb.append("result.getTotal(_total);")
+		sb.append("result.setTotal(_total);")
 				.append("if(0== _total){result.setPageNo(1);result.setData(java.util.Collections.<")
 				.append(this.realReturnType).append(">emptyList()); return result;}");
 		

@@ -12,10 +12,6 @@ public class PageQueryOperateCG extends DBOperateCG {
 
 	private static final String prefix = "org.jfw.util.PageQueryResult<";
 	private static final int prefixLen = prefix.length();
-
-	// private String querySql;
-	// private String pageQuerySql;
-
 	private String staticWhereSql;
 	private String realReturnType;
 	private PersistentObject bean;
@@ -25,12 +21,7 @@ public class PageQueryOperateCG extends DBOperateCG {
 
 	private WhereSentence where;
 
-	// private boolean singleRow() default false;
-	// DE singleColumn() default DE.invalid_de;
-	// Class<?> resultClass() default Object.class;
 	private String otherSentence;
-	// Where where() default @Where();
-	//
 	private PageQuery query;
 
 	private void checkMethod() throws AptException {
@@ -82,35 +73,17 @@ public class PageQueryOperateCG extends DBOperateCG {
 			Utils.addSqlToStringBuilder(staticWhereSql, sb);
 			sb.append("\";\r\n");
 		}
-		// if(this.otherSentence!=null){
-		// sb.append(" ");
-		// Utils.addSqlToStringBuilder(this.otherSentence, sb);
-		// }
-		// sb.append("\";\r\n");
 	}
 
 	private void buildDynamicWhereSQL() throws AptException {
 		sb.append("StringBuilder sql = new StringBuilder();\r\n");
 		this.where.appendToSql(sb);
-		//
-		// if(this.otherSentence!=null){
-		// sb.append("sql.append(\" ");
-		// Utils.addSqlToStringBuilder(this.otherSentence, sb);
-		// sb.append("\");\r\n");
-		// }
 	}
 
 	private void checkSQL() throws AptException {
-
-		// this.querySql = "SELECT * FROM ( SELECT " +
-		// this.bean.getQueryFields() + ",ROWNUM ROW$NUM FROM ";
 		String fs = this.bean.getFromSentence();
 		if (fs == null || fs.trim().length() == 0)
 			throw new AptException(this.ref, "unknow fromsentence");
-		// this.querySql = this.querySql + fs.trim();
-
-		// this.pageQuerySql ="SELECT COUNT(1) FROM "+fs.trim();
-
 	}
 
 	@Override
@@ -122,7 +95,6 @@ public class PageQueryOperateCG extends DBOperateCG {
 		this.checkMethod();
 		this.where = WhereSentence.build(ref, this.query.where(), this.attributes);
 		this.dynamic = where.isDynamicWhereSql();
-		// this.checkReturnType();
 		this.checkSQL();
 		where.prepare(sb);
 		if (this.dynamic) {
@@ -267,7 +239,7 @@ public class PageQueryOperateCG extends DBOperateCG {
 						.append(" WHERE \"+_tmpsql;\r\n");
 			}
 		}
-		sb.append("try{ java.sql.PreparedStatement _pagePs = con.prepareStatement(sql");
+		sb.append("java.sql.PreparedStatement _pagePs = con.prepareStatement(sql");
 		if (this.dynamic) {
 			sb.append(".toString()");
 		}
@@ -275,11 +247,11 @@ public class PageQueryOperateCG extends DBOperateCG {
 		sb.append("try{");
 		this.where.buildParam(sb);
 		sb.append(
-				"java.sql.ResultSet _pageRs = ps.executeQuery();\r\ntry{if(_pageRs.next()){_total = _pageRs.getInt(1);}}")
-				.append("finally{try{_pageRs.close()}catch(Exception e){}}")
+				"java.sql.ResultSet _pageRs = _pagePs.executeQuery();\r\ntry{if(_pageRs.next()){_total = _pageRs.getInt(1);}}")
+				.append("finally{try{_pageRs.close();}catch(Exception e){}}")
 				.append("}finally{\r\ntry{_pagePs.close();}catch(Exception e){}\r\n}\r\n");
 
-		sb.append("result.getTotal(_total);")
+		sb.append("result.setTotal(_total);")
 				.append("if(0== _total){result.setPageNo(1);result.setData(java.util.Collections.<")
 				.append(this.realReturnType).append(">emptyList()); return result;}");
 
