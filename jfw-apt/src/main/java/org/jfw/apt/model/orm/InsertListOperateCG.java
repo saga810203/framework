@@ -21,15 +21,6 @@ public class InsertListOperateCG extends DBOperateCG {
 
 	
 	
-	
-	protected void checkJdbc() throws AptException{
-		if(this.params.isEmpty()|| !this.params.get(0).getTypeName().equals("java.sql.Connection")|| !this.params.get(0).getName().equals("con"))
-			throw new AptException(ref,"this method must be has param & the first param type is java.sql.Connection name is con");
-		if(this.throwables.isEmpty() || !this.throwables.contains("java.sql.SQLException")){
-			throw new AptException(ref,"this method must be throws java.sql.SQLException");
-		}
-	}
-	
 	protected  void prepare() throws AptException{
 		
 		this.insertList = this.ref.getAnnotation(InsertList.class);
@@ -162,10 +153,11 @@ public class InsertListOperateCG extends DBOperateCG {
 	@Override
 	protected boolean needRelaceResource() {
 		for (Column col : this.columns) {
-			if (null == col.getHandler())
-				continue;
-			if (col.getHandler().isReplaceResource())
-				return true;
+			if (null == col.getFixInsertSqlValue()) {
+				if (col.getHandler().isReplaceResource())
+					return true;
+			}
+			
 		}
 		return false;
 	}
@@ -173,17 +165,16 @@ public class InsertListOperateCG extends DBOperateCG {
 	@Override
 	protected void relaceResource() {
 		for (Column col : this.columns) {
-			if (null == col.getHandler())
-				continue;
-			col.getHandler().replaceResource(sb);
+			if (null == col.getFixInsertSqlValue()) {
+				col.getHandler().replaceResource(sb);
+			}
+			
 		}
 	}
 	@Override
 	protected void buildSqlParamter() {
 		for (int i = 0; i < this.columns.size(); ++i) {
 			Column col = this.columns.get(i);
-			if (!col.isInsertable())
-				continue;
 			if (null == col.getFixInsertSqlValue()) {
 				col.getHandler().writeValue(sb, false);
 			}

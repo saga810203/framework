@@ -8,6 +8,7 @@ import javax.lang.model.type.MirroredTypeException;
 import org.jfw.apt.Utils;
 import org.jfw.apt.annotation.orm.Delete;
 import org.jfw.apt.exception.AptException;
+import org.jfw.apt.model.MethodParamEntry;
 import org.jfw.apt.model.core.TypeName;
 
 public class DeleteOperateCG extends DBOperateCG {
@@ -16,6 +17,68 @@ public class DeleteOperateCG extends DBOperateCG {
 	private PersistentObject po;
 	private List<Column> values = new ArrayList<Column>();
 	private boolean byBean = true;
+
+	private void resolerWhere() throws AptException {
+		if (this.byBean) {
+			this.resolerWhereByBean();
+		} else {
+			List<Column> list = this.po.getAllColumn();
+			for (int i = 1; i < this.params.size(); ++i) {
+				MethodParamEntry mpe = this.params.get(i);
+				String pn = mpe.getName();
+				boolean found = false;
+				for (Column col : list) {
+					if (pn.equals(col.getJavaName())) {
+						col.initHandler(ref);
+						if (!TypeName.get(col.getHandler().supportsClass()).toString().equals(mpe.getTypeName())) {
+							throw new AptException(ref,
+									"param [" + pn + "] type not equals PersistentObject attribute type");
+						}
+						this.values.add(col);
+						col.getHandler().init(pn, false, false, this.attributes);
+						col.getHandler().prepare(sb);
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					throw new AptException(ref,
+							"this method[@Delete] param[" + pn + "] not found in PersistentObject attributes");
+				}
+			}
+		}
+	}
+
+	private void resolerWhereByBean() throws AptException {
+
+		String unName = Utils.emptyToNull(this.delete.value());
+		if (null == unName)
+			throw new AptException(ref, "@Delete'value can't empty or null");
+		UniqueConstraint unique = null;
+		if (unName.equals("PrimaryKey")) {
+			unique = this.po.getPrimaryKey();
+			if (unique == null)
+				throw new AptException(ref, "Table[" + this.po.getJavaName() + "] hasn't PrimaryKey");
+		} else {
+			unique = this.po.getUniqueConstraint(this.delete.value());
+			if (unique == null)
+				throw new AptException(ref,
+						"Table[" + this.po.getJavaName() + "] hasn't unique constraint " + delete.value());
+		}
+		List<Column> list = this.po.getAllColumn();
+		String[] keys = unique.getJavaNames();
+		for (String key : keys) {
+			for (Column col : list) {
+				if (col.getJavaName().equals(key)) {
+					this.values.add(col);
+					col.initHandler(ref);
+					col.getHandler().init(this.params.get(1).getName() + "." + col.getGetter() + "()", false, false,
+							this.attributes);
+					col.getHandler().prepare(sb);
+				}
+			}
+		}
+	}
 
 	@Override
 	protected void prepare() throws AptException {
@@ -50,84 +113,24 @@ public class DeleteOperateCG extends DBOperateCG {
 				throw new AptException(ref, "this method[@Delete'target value must be Object.class or Class(@Table)");
 			}
 		}
+		this.resolerWhere();
 
-		String unName = Utils.emptyToNull(this.delete.value());
-		if (null == unName)
-			throw new AptException(ref, "@Delete'value can't empty or null");
-		UniqueConstraint unique = null;
-		if (unName.equals("PrimaryKey")) {
-			unique = this.po.getPrimaryKey();
-			if (unique == null)
-				throw new AptException(ref, "Table[" + this.po.getJavaName() + "] hasn't PrimaryKey");
-		} else {
-			unique = this.po.getUniqueConstraint(this.delete.value());
-			if (unique == null)
-				throw new AptException(ref,
-						"Table[" + this.po.getJavaName() + "] hasn't unique constraint " + delete.value());
-		}
-		List<Column> list = this.po.getAllColumn();
-		String[] keys = unique.getJavaNames();
-		for (String key : keys) {
-			for (Column col : list) {
-				if (col.getJavaName().equals(key)) {
-					this.values.add(col);
-				}
+		sb.append("String sql=\"DELETE FROM ").append(this.po.getFromSentence());
+		for (int i = 0; i < this.values.size(); ++i) {
+			if (i != 0) {
+				sb.append(" AND ");
+			} else {
+				sb.append(" WHERE ");
 			}
-		}
-
-		if (!this.byBean) {
-			if (this.values.size() != (this.params.size() - 1))
-				throw new AptException(ref,
-						"this method[@Delete] parameters count not accord with table unique constraint column count ");
-			for (Column col : this.values) {
-				boolean found = false;
-				for (int i = 1; i < this.params.size(); ++i) {
-					String pt = this.params.get(i).getTypeName();
-					String pn = this.params.get(i).getName();
-					String vt = col.getJavaType();
-					String vn = col.getJavaName();
-					if (pt.equals(vt) && pn.endsWith(vn)) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					throw new AptException(ref, "this method[@Delete] unique constraint cloumn[" + col.getJavaName()
-							+ "] not found in parameters");
-				}
-			}
-		}
-		this.initOrmHandlers();
-	
-	
-		sb.append("String sql=\"DELETE FROM ").append(this.po.getFromSentence()).append(" WHERE ");
-		for(int i = 0 ; i < this.values.size() ; ++i){
-			if(i!=0) sb.append(" AND ");
 			sb.append(this.values.get(i).getDbName()).append("=?");
 		}
 		sb.append("\";\r\n");
 	}
 
-
-
-	private void initOrmHandlers() throws AptException {
-		for (int i = 0; i < this.values.size(); ++i) {
-			Column col = this.values.get(i);
-			col.initHandler(ref);
-			if(this.byBean)
-			col.getHandler().init(this.params.get(1).getName()+"."+col.getGetter()+"()",false, false, this.attributes);
-			else{
-				col.getHandler().init(col.getJavaName(),false, false, this.attributes);	
-			}
-			col.getHandler().prepare(sb);
-		}
-	}
-
-	
 	@Override
 	protected void buildSqlParamter() {
 		for (int i = 0; i < this.values.size(); ++i) {
-			this.values.get(i).getHandler().writeValue(sb,false);			
+			this.values.get(i).getHandler().writeValue(sb, false);
 		}
 	}
 
@@ -144,7 +147,7 @@ public class DeleteOperateCG extends DBOperateCG {
 				return true;
 		}
 		return false;
-		
+
 	}
 
 	@Override

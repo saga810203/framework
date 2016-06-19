@@ -70,17 +70,4 @@ public abstract class DBOperateCG extends AbstractMethodGenerater{
 		sb.append("}");			
 		return sb.toString();
 	}
-	
-
-	
-	
-//	protected void createPreparedStatement()
-//	{
-//		if(this.dynamic){
-//			sb.append("")
-//		}
-//	}
-	
-	
-	
 }

@@ -17,15 +17,27 @@ public class UpdateOperateCG extends DBOperateCG {
 	private List<Column> columns;
 	private List<Column> values = new ArrayList<Column>();
 	private List<Column> filters = new ArrayList<Column>();
+	private List<String> exincludeColumn = new ArrayList<String>();
+	
+	
+	private void initExincludeColumn(){
+		String[] ec = this.update.exincludeColumn();
+		if(ec==null) return ;
+		for(String str:ec){
+			if(str!=null && str.trim().length()>0)
+				this.exincludeColumn.add(str.trim());
+		}
+	}
 
 	@Override
 	protected void prepare() throws AptException {
 		this.update = this.ref.getAnnotation(Update.class);
+		
 		if (this.update == null)
 			throw new AptException(this.ref, "nofound @Update on this method");
 		if (!this.returnType.equals("int"))
 			throw new AptException(ref, "this method(@Update) must return int");
-
+		this.initExincludeColumn();
 		if (this.params.size() != 2)
 			throw new AptException(ref, "this method(@Update) parameters count must be 2");
 
@@ -157,7 +169,7 @@ public class UpdateOperateCG extends DBOperateCG {
 					break;
 				}
 			}
-			if ((!inWhere) && col.isRenewable())
+			if ((!inWhere) && col.isRenewable()&& (!this.exincludeColumn.contains(col.getJavaName())))
 				this.values.add(col);
 		}
 		if (this.values.isEmpty())
@@ -222,7 +234,7 @@ public class UpdateOperateCG extends DBOperateCG {
 	@Override
 	protected boolean needRelaceResource() {
 		for (Column col : this.values) {
-			if (null == col.getHandler())
+			if (null != col.getFixUpdateSqlValue())
 				continue;
 			if (col.getHandler().isReplaceResource())
 				return true;
@@ -237,7 +249,7 @@ public class UpdateOperateCG extends DBOperateCG {
 	@Override
 	protected void relaceResource() {
 		for (Column col : this.values) {
-			if (null == col.getHandler())
+			if (null != col.getFixUpdateSqlValue())
 				continue;
 			col.getHandler().replaceResource(sb);
 		}

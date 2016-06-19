@@ -100,8 +100,9 @@ public class InsertOperateCG extends DBOperateCG {
 	@Override
 	protected boolean needRelaceResource() {
 		for (Column col : this.columns) {
-			if (null == col.getHandler())
+			if (null != col.getFixInsertSqlValue()) {
 				continue;
+			}
 			if (col.getHandler().isReplaceResource())
 				return true;
 		}
@@ -111,8 +112,9 @@ public class InsertOperateCG extends DBOperateCG {
 	@Override
 	protected void relaceResource() {
 		for (Column col : this.columns) {
-			if (null == col.getHandler())
+			if (null != col.getFixInsertSqlValue()) {
 				continue;
+			}
 			col.getHandler().replaceResource(sb);
 		}
 	}

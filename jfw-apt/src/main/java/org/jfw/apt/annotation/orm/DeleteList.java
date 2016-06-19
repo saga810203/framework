@@ -5,12 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.jfw.apt.model.orm.UpdateOperateCG;
+import org.jfw.apt.model.orm.DeleteListOperateCG;
+
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
-public @interface Update {
-	boolean dynamicValue() default false;
+public @interface DeleteList {
 	String value() default "PrimaryKey";
-	String[] exincludeColumn() default {};
-	Class<?> handlerClass() default UpdateOperateCG.class;
+	Class<?> target() default Object.class; 
+	Class<?> handlerClass() default DeleteListOperateCG.class;
 }
