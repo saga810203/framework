@@ -9,8 +9,8 @@ import org.jfw.apt.annotation.orm.DataBaseHandler;
 import org.jfw.apt.annotation.orm.DeleteList;
 import org.jfw.apt.annotation.orm.InsertList;
 import org.jfw.apt.annotation.orm.UpdateList;
-import org.jfw.apt.annotation.orm.UpdateListVal;
-import org.jfw.apt.annotation.orm.UpdateVal;
+import org.jfw.apt.annotation.orm.UpdateListWith;
+import org.jfw.apt.annotation.orm.UpdateWith;
 import org.jfw.test.po.User;
 
 @DataBaseHandler
@@ -40,18 +40,18 @@ public abstract class UserSDao {
 	public abstract int[] deleteById(Connection con,List<String> id) throws SQLException,IOException;
 	
 	
-	@UpdateListVal(target=User.class,where="id")
+	@UpdateListWith(target=User.class,where="id")
 	public abstract int[] update(Connection con,List<String> id,List<String> name) throws SQLException,IOException;
 	
 	
-	@UpdateListVal(target=User.class,where="id")
+	@UpdateListWith(target=User.class,where="id")
 	public abstract int[] update(Connection con,String[] id,String[] name) throws SQLException,IOException;
 	
 	
-	@UpdateVal(target=User.class,where="id")
+	@UpdateWith(target=User.class,where="id")
 	public abstract int update(Connection con,String id,String name) throws SQLException,IOException;
 	
-	@UpdateVal(target=User.class,where={"id","loginName"})
+	@UpdateWith(target=User.class,where={"id","loginName"})
 	public abstract int update(Connection con,String id,String name,String loginName,String commm) throws SQLException,IOException;
 	
 }

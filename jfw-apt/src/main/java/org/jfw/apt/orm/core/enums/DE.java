@@ -35,8 +35,8 @@ public enum DE {
     DateTime_de(OrmString.class,"CHAR",14,-1,true,null,null,true), 
     
     
-    CreateTime_de(OrmString.class,"CHAR",14,-1,false,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",null,true),
-    ModifyTime_de(OrmString.class,"CHAR",14,-1,false,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)","TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",true),
+    createTime_de(OrmString.class,"CHAR",14,-1,false,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)","TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",true),
+    modifyTime_de(OrmString.class,"CHAR",14,-1,false,"TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)","TO_CHAR('YYYYMMDDHH24MISS',SYSDATE)",true),
     
 	bigDecmimal(OrmBigDecimal.class,"DECIMAL",10,10,false,null,null,true),
 	BigDecmimal(OrmBigDecimal.class,"DECIMAL",10,10,true,null,null,true),

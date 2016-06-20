@@ -6,10 +6,10 @@ import org.jfw.apt.orm.core.enums.DE;
 
 @VirtualTable
 public class BasePO {
-	@Column(value=DE.CreateTime_de,renewable=false)
+	@Column(value=DE.createTime_de,renewable=false)
 	private String createTime;
 
-	@Column(value=DE.ModifyTime_de)
+	@Column(value=DE.modifyTime_de)
 	private String modifyTime;
 	public String getCreateTime() {
 		return createTime;
