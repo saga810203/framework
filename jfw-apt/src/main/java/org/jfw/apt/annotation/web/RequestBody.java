@@ -12,5 +12,6 @@ import org.jfw.apt.model.web.handlers.buildparam.RequestBodyHandler;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RequestBody {
 	String targetTypeName() default "";
+	boolean encoding() default false;
 	Class<? extends BuildParameter> buildParamClass() default RequestBodyHandler.class;
 }

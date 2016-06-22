@@ -19,9 +19,18 @@ public class RequestBodyHandler extends BuildParamHandler.BuildParameter {
 		if (tn == null) {
 			tn = mpe.getTypeName();
 		}
+		
+		if(mpe.getTypeName().equals("java.lang.String")){
+			sb.append("String ").append(mpe.getName()).append(" org.jfw.util.StringUtil.fromByUTF8AndClose(req.getInputStream());");
+			if(rb.encoding()){
+				sb.append(mpe.getName()).append("=java.net.URLDecoder.decode(").append(mpe.getName()).append("\"UTF-8\");");
+			}
+			return;			
+		}
+		
+		
 		boolean parameterized = tn.indexOf("<") >= 0;
 		sb.append(mpe.getTypeName()).append(" ").append(mpe.getName()).append(" =  null;\r\n");
-
 		String localName = rmcg.getTempalteVariableName();
 		sb.append("java.io.InputStream ").append(localName).append(" = req.getInputStream();\r\n").append("try{\r\n").append(mpe.getName())
 				.append(" = ");
