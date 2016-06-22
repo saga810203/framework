@@ -62,7 +62,7 @@ public class RequestParamModel {
 	private String paramName = "";
 	private String variableName = null;
 	private TypeName realClass = TypeName.OBJECT;
-	private String defaultValue =  "null";
+	private String defaultValue =  "";
 	private boolean required = true;
 	private Field[] fields = new Field[0];	
 	private String[] excludeFields = new String[0];	
@@ -84,7 +84,7 @@ public class RequestParamModel {
 		
 		if(!tn.equals(TypeName.OBJECT)) result.realClass = tn;
 		result.defaultValue = rp.defaultValue();
-		result.required = rp.required();
+		result.required = (result.defaultValue == null) || (result.defaultValue.trim().length()==0);
 		if(rp.fields()!=null&& rp.fields().length>0){
 			List<Field> list = new ArrayList<Field>();
 			for(int i = 0 ; i <  rp.fields().length ; ++i){

@@ -12,6 +12,7 @@ import org.jfw.apt.model.web.handlers.ChangeResultHandler;
 import org.jfw.apt.model.web.handlers.ExecuteHandler;
 import org.jfw.apt.model.web.handlers.LastScriptHandler;
 import org.jfw.apt.model.web.handlers.LoginUserHandler;
+import org.jfw.apt.model.web.handlers.ResultToNullHandler;
 import org.jfw.apt.model.web.handlers.SetSessionHandler;
 import org.jfw.apt.model.web.handlers.ValidateParamHandler;
 import org.jfw.apt.model.web.handlers.ViewHandler;
@@ -22,8 +23,10 @@ import org.jfw.apt.model.web.handlers.JdbcConnectionHandler;
 public @interface WebHandler {
 	Class<?> handlerClass() default WebHandlerSupported.class;
 
-	Class<? extends RequestHandler>[] handler() default { ViewHandler.class,LoginUserHandler.class, BuildParamHandler.class,ValidateParamHandler.class,
-			JdbcConnectionHandler.class, ExecuteHandler.class, SetSessionHandler.class,ChangeResultHandler.class,LastScriptHandler.class };
+	Class<? extends RequestHandler>[] handler() default { ViewHandler.class, LoginUserHandler.class,
+			BuildParamHandler.class, ValidateParamHandler.class, JdbcConnectionHandler.class, ExecuteHandler.class,
+			SetSessionHandler.class, ChangeResultHandler.class, LastScriptHandler.class,ResultToNullHandler.class };
+
 	String value() default "";
-//	Class<?> defaultHandlerClass() default Object.class;
+	// Class<?> defaultHandlerClass() default Object.class;
 }

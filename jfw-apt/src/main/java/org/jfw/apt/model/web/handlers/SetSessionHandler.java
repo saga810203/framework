@@ -24,7 +24,7 @@ public class SetSessionHandler extends RequestHandler{
 				String n = val.substring(0,index).trim();
 				String v = val.substring(index+1).trim();
 				if(v.length()==0)throw new AptException(this.getRmcg().getRef(),"invalid @SetSession");
-				sb.append("session.setAttriubte(\"").append(n).append("\",").append(v).append(");\r\n");			
+				sb.append("session.setAttribute(\"").append(n).append("\",").append(v).append(");\r\n");			
 			}
 		}
 	}

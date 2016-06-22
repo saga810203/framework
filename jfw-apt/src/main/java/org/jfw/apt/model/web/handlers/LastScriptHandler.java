@@ -17,7 +17,7 @@ public class LastScriptHandler extends RequestHandler{
 		LastScript ls = this.getRmcg().getRef().getAnnotation(LastScript.class);
 		if(ls!=null){
 			String[] ss = ls.value();
-			if(ss!=null&& ss.length>1){
+			if(ss!=null&& ss.length>0){
 				for(int i = 0 ; i < ss.length ; ++i){
 					String s = Utils.emptyToNull(ss[i]);
 					if(null!=s){

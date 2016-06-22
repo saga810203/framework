@@ -14,7 +14,6 @@ public @interface RequestParam {
 	String value() default "";
 	Class<?> clazz() default Object.class;
 	String defaultValue() default "";
-	boolean required() default true;
 	FieldParam[] fields() default {};
 	String[] excludeFields() default {};
 	Class<? extends BuildParameter> buildParamClass() default RequestParamHandler.class;
