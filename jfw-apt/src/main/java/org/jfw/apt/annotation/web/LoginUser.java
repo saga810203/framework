@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.jfw.apt.model.web.handlers.BuildParamHandler.BuildParameter;
-import org.jfw.apt.model.web.handlers.buildparam.LoginUserHandler;
+import org.jfw.apt.model.web.handlers.buildparam.NopHandler;
 
-@Target(ElementType.PARAMETER)
+@Target({ElementType.PARAMETER,ElementType.METHOD})
 @Retention(RetentionPolicy.SOURCE)
 public @interface LoginUser {
 	/**
@@ -20,5 +20,5 @@ public @interface LoginUser {
 	 * valid authority , 0  don't valid
 	 */
 	int auth() default 0;
-	Class<? extends BuildParameter> buildParamClass() default LoginUserHandler.class;
+	Class<? extends BuildParameter> buildParamClass() default NopHandler.class;
 }

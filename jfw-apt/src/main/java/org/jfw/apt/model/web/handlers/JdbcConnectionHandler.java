@@ -1,42 +1,56 @@
 package org.jfw.apt.model.web.handlers;
 
-import org.jfw.apt.exception.AptException;
-import org.jfw.apt.model.web.RequestHandler;
-import org.jfw.apt.model.web.handlers.buildparam.ConnectionHandler;
+import java.util.List;
 
-public class JdbcConnectionHandler  extends RequestHandler{
-	
-	private boolean use = false;
-	private boolean commit = false;
+import org.jfw.apt.annotation.web.JdbcConn;
+import org.jfw.apt.exception.AptException;
+import org.jfw.apt.model.MethodParamEntry;
+import org.jfw.apt.model.web.RequestHandler;
+
+public class JdbcConnectionHandler extends RequestHandler {
+	private boolean _commit = false;
+	private String _pn = null;
 
 	@Override
 	public void init() throws AptException {
-		
+
 	}
 
 	@Override
 	public void appendBeforCode(StringBuilder sb) throws AptException {
-		this.use = Boolean.TRUE.equals(this.getRmcg().getAttribute(ConnectionHandler.NEED_JDBC_CONN));
-		this.commit = Boolean.TRUE.equals(this.getRmcg().getAttribute(ConnectionHandler.COMMIT_JDBC_CONN));
-		if(this.use){
-			sb.append("java.sql.Connection con = this.dataSource.getConnection();\r\n");
-			sb.append("try{");			
+		List<MethodParamEntry> mpes = this.getRmcg().getParams();
+		_commit = false;
+		_pn = null;
+
+		for (MethodParamEntry mpe : mpes) {
+			JdbcConn con = mpe.getRef().getAnnotation(JdbcConn.class);
+			if (null != con) {
+				if (!"java.sql.Connection".equals(mpe.getTypeName()))
+					throw new AptException(mpe.getRef(), "@JdbcConn java type must be java.sql.Connection");
+				_pn = mpe.getName();
+				_commit = con.value();
+				break;
+			}
+		}
+		if (_pn != null) {
+			sb.append(_pn).append("= this.dataSource.getConnection();\r\n");
+			sb.append("try{");
 		}
 	}
 
 	@Override
 	public void appendAfterCode(StringBuilder sb) throws AptException {
-		if(this.use){
-			if(this.commit){
-				sb.append("con.commit();");
+		if (this._pn != null) {
+			if (this._commit) {
+				sb.append(this._pn).append(".commit();");
 				String tmp = this.getRmcg().getTempalteVariableName();
 				String tmp1 = this.getRmcg().getTempalteVariableName();
-				sb.append("}catch(Throwable ").append(tmp)
-				.append("){try{con.rollback();}catch(Throwable ").append(tmp1).append("){}\r\n")
-				.append("throw ").append(tmp).append(";");
+				sb.append("}catch(Throwable ").append(tmp).append("){try{").append(_pn)
+						.append(".rollback();}catch(Throwable ").append(tmp1).append("){}\r\n").append("throw ")
+						.append(tmp).append(";");
 			}
 			String tmp2 = this.getRmcg().getTempalteVariableName();
-			sb.append("}finally{try{con.close();}catch(Throwable ").append(tmp2).append("){}\r\n}");
+			sb.append("}finally{try{").append(_pn).append(".close();}catch(Throwable ").append(tmp2).append("){}\r\n}");
 		}
 	}
 }

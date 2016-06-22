@@ -11,7 +11,7 @@ public class SetSessionHandler extends RequestHandler{
 	}
 
 	@Override
-	public void appendAfterCode(StringBuilder sb) throws AptException {
+	public void appendBeforCode(StringBuilder sb) throws AptException {
 		SetSession ss = this.getRmcg().getRef().getAnnotation(SetSession.class);
 		if(ss!=null){
 			this.getRmcg().readSession(sb);

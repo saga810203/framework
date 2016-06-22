@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.jfw.apt.model.web.handlers.BuildParamHandler.BuildParameter;
-import org.jfw.apt.model.web.handlers.buildparam.ConnectionHandler;
+import org.jfw.apt.model.web.handlers.buildparam.DefineHandler;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.SOURCE)
 public @interface JdbcConn {
 	boolean value() default false;
-	Class<? extends BuildParameter> buildParamClass() default ConnectionHandler.class;
+	Class<? extends BuildParameter> buildParamClass() default DefineHandler.class;
 }
